@@ -1,0 +1,60 @@
+.biforglpi-lab {
+    max-width: 1440px;
+    padding-block: 1.5rem 2.5rem;
+}
+
+.biforglpi-card {
+    box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 6%);
+}
+
+.biforglpi-card .card-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.biforglpi-actions {
+    align-items: end;
+    display: flex;
+    gap: 1rem;
+}
+
+.biforglpi-actions > div {
+    width: 10rem;
+}
+
+#biforglpi-sql {
+    line-height: 1.55;
+    min-height: 16rem;
+    resize: vertical;
+    tab-size: 4;
+}
+
+#biforglpi-table-wrap table {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+#biforglpi-table-wrap td {
+    max-width: 32rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#biforglpi-table-wrap .biforglpi-null {
+    color: var(--tblr-secondary);
+    font-style: italic;
+}
+
+@media (max-width: 576px) {
+    .biforglpi-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .biforglpi-actions > div,
+    .biforglpi-actions .btn {
+        width: 100%;
+    }
+}
