@@ -1,0 +1,12 @@
+/.idea/
+/.vscode/
+/.phpunit.cache/
+/node_modules/
+/vendor/
+composer.lock
+npm-debug.log*
+yarn-error.log*
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
