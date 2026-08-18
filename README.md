@@ -20,8 +20,10 @@ git clone https://github.com/nardony-lang/glpi-plugin-bi-for-glpi.git biforglpi
 ```
 
 Depois, no GLPI, acesse **Configuração > Plugins**, instale e ative **BI for GLPI**.
-O Laboratório SQL ficará disponível no menu **Plugins** para perfis com direito de
-leitura em Configuração.
+O Laboratório SQL ficará disponível no menu **Plugins** somente para perfis com o
+direito específico **Executar consultas SQL**. Na instalação, esse direito é concedido
+apenas ao perfil que instalou o plugin, normalmente o **Super-Admin**. Ele pode ser
+administrado posteriormente em **Administração > Perfis > BI for GLPI**.
 
 ## Laboratório SQL
 
@@ -33,11 +35,12 @@ O laboratório aceita uma única instrução iniciada por:
 
 Proteções incluídas:
 
-- acesso restrito a usuários autenticados com direito administrativo `config/READ`;
+- acesso restrito ao direito específico `plugin_biforglpi_sql_lab/READ`;
 - proteção CSRF do GLPI 11 para a chamada AJAX;
 - rejeição de múltiplas instruções, comentários SQL e comandos de escrita/DDL;
 - bloqueio de cláusulas e funções com efeitos colaterais ou acesso a arquivos;
 - limite configurável de 1 a 500 linhas, com padrão de 100;
+- timeout de 10 segundos imposto pelo MySQL ou MariaDB para cada consulta;
 - medição do tempo de execução e indicação de resultado truncado;
 - renderização de células com `textContent`, sem interpretar HTML retornado pelo banco.
 
@@ -72,6 +75,12 @@ Antes de enviar alterações, valide a sintaxe de todos os arquivos PHP:
 
 ```bash
 find . -name '*.php' -print0 | xargs -0 -n1 php -l
+```
+
+Execute também os testes das regras de segurança e do timeout:
+
+```bash
+php tests/run.php
 ```
 
 ## Licença

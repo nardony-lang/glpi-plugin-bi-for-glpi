@@ -5,7 +5,7 @@ use GlpiPlugin\Biforglpi\SqlLab;
 
 include '../../../inc/includes.php';
 
-Session::checkRight('config', READ);
+Session::checkRight(SqlLab::RIGHT_NAME, READ);
 
 $pluginUrl = Plugin::getWebDir('biforglpi');
 $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
@@ -28,7 +28,10 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
 
         <div class="card-body">
             <div class="alert alert-info" role="status">
-                <?= __('Permitidos: SELECT, WITH e EXPLAIN. Escritas, comentários e múltiplas instruções são bloqueados.', 'biforglpi') ?>
+                <?= sprintf(
+                    __('Permitidos: SELECT, WITH e EXPLAIN. Escritas, comentários e múltiplas instruções são bloqueados. Tempo máximo: %d segundos.', 'biforglpi'),
+                    SqlExecutor::MAX_EXECUTION_TIME_SECONDS
+                ) ?>
             </div>
 
             <form id="biforglpi-query-form">

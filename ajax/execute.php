@@ -1,6 +1,7 @@
 <?php
 
 use GlpiPlugin\Biforglpi\SqlExecutor;
+use GlpiPlugin\Biforglpi\SqlLab;
 use GlpiPlugin\Biforglpi\SqlReadOnlyGuard;
 
 include '../../../inc/includes.php';
@@ -15,7 +16,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     exit;
 }
 
-Session::checkRight('config', READ);
+Session::checkRight(SqlLab::RIGHT_NAME, READ);
 
 try {
     $sql = (new SqlReadOnlyGuard())->validate((string) ($_POST['sql'] ?? ''));

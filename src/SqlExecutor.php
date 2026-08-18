@@ -10,6 +10,7 @@ final class SqlExecutor
 {
     public const DEFAULT_LIMIT = 100;
     public const MAX_LIMIT = 500;
+    public const MAX_EXECUTION_TIME_SECONDS = 10;
 
     /**
      * @return array{columns: list<string>, rows: list<array<string, mixed>>, elapsed_ms: float, truncated: bool, limit: int}
@@ -27,6 +28,19 @@ final class SqlExecutor
             );
 
         $connection = DBConnection::getReadConnection();
+        $versionResult = $connection->doQuery('SELECT VERSION() AS `version`');
+        $versionRow = is_object($versionResult) && method_exists($versionResult, 'fetch_assoc')
+            ? $versionResult->fetch_assoc()
+            : null;
+        if (!is_array($versionRow) || !isset($versionRow['version'])) {
+            throw new RuntimeException('Não foi possível identificar a versão do banco de dados.');
+        }
+
+        $query = (new SqlQueryTimeout(self::MAX_EXECUTION_TIME_SECONDS))->apply(
+            $query,
+            (string) $versionRow['version']
+        );
+
         $transactionStarted = false;
         $startedAt = hrtime(true);
         try {

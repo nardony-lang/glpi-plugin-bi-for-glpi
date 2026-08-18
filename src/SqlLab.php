@@ -7,6 +7,10 @@ use Session;
 
 final class SqlLab extends CommonGLPI
 {
+    public const RIGHT_NAME = 'plugin_biforglpi_sql_lab';
+
+    public static $rightname = self::RIGHT_NAME;
+
     public static function getMenuName($nb = 0): string
     {
         return __('BI for GLPI', 'biforglpi');
@@ -29,6 +33,6 @@ final class SqlLab extends CommonGLPI
 
     public static function canView(): bool
     {
-        return Session::haveRight('config', READ);
+        return Session::haveRight(self::RIGHT_NAME, READ);
     }
 }

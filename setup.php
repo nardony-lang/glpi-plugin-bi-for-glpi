@@ -7,9 +7,10 @@
  */
 
 use Glpi\Plugin\Hooks;
+use GlpiPlugin\Biforglpi\Profile as BiforglpiProfile;
 use GlpiPlugin\Biforglpi\SqlLab;
 
-define('PLUGIN_BIFORGLPI_VERSION', '0.1.0');
+define('PLUGIN_BIFORGLPI_VERSION', '0.1.1');
 define('PLUGIN_BIFORGLPI_MIN_GLPI_VERSION', '11.0.0');
 define('PLUGIN_BIFORGLPI_MAX_GLPI_VERSION', '12.0.0');
 
@@ -20,6 +21,10 @@ function plugin_init_biforglpi(): void
     $PLUGIN_HOOKS[Hooks::MENU_TOADD]['biforglpi'] = [
         'plugins' => SqlLab::class,
     ];
+
+    Plugin::registerClass(BiforglpiProfile::class, [
+        'addtabon' => Profile::class,
+    ]);
 }
 
 /** @return array<string, mixed> */
