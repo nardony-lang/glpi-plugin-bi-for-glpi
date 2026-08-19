@@ -134,4 +134,4 @@ GPL-3.0-or-later. Consulte [LICENSE](LICENSE).
 
 ## Autoria
 
-Desenvolvido por **Douglas Nardoni da Silva**.
+Desenvolvido por **Douglas Nardoni**.

@@ -117,7 +117,7 @@ namespace {
     );
     assertSameValue(
         'Autor do plugin',
-        'Douglas Nardoni da Silva',
+        'Douglas Nardoni',
         plugin_version_biforglpi()['author'] ?? null
     );
 

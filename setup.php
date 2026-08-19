@@ -44,7 +44,7 @@ function plugin_version_biforglpi(): array
     return [
         'name'         => 'BI for GLPI',
         'version'      => PLUGIN_BIFORGLPI_VERSION,
-        'author'       => 'Douglas Nardoni da Silva',
+        'author'       => 'Douglas Nardoni',
         'license'      => 'GPL-3.0-or-later',
         'homepage'     => 'https://github.com/nardony-lang/glpi-plugin-bi-for-glpi',
         'requirements' => [
