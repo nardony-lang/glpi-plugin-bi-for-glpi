@@ -87,6 +87,13 @@ final class SavedQuery
         global $DB;
 
         Session::checkRight(Profile::RIGHT_MANAGE_QUERIES, UPDATE);
+        foreach ($DB->request([
+            'FROM' => DashboardWidget::TABLE,
+            'WHERE' => ['savedqueries_id' => $id],
+            'LIMIT' => 1,
+        ]) as $widget) {
+            throw new InvalidArgumentException('Remova esta consulta dos dashboards antes de excluí-la.');
+        }
         if (!$DB->delete(self::TABLE, ['id' => $id])) {
             throw new RuntimeException('Não foi possível excluir a consulta.');
         }

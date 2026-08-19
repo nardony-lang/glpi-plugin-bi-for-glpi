@@ -13,6 +13,7 @@ final class Navigation
         $links = [];
         if (Session::haveRight(Profile::RIGHT_VIEW_DASHBOARD, READ)) {
             $links['dashboard'] = ['Dashboard', $baseUrl . '/front/dashboard.php', 'ti-layout-dashboard'];
+            $links['dashboards'] = ['Meus dashboards', $baseUrl . '/front/dashboards.php', 'ti-folders'];
         }
         if (Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ)) {
             $links['queries'] = ['Consultas salvas', $baseUrl . '/front/queries.php', 'ti-database'];
