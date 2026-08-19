@@ -47,6 +47,14 @@ foreach (['dashboard.form.php', 'widget.form.php', 'dashboardrights.form.php'] a
             && strrpos($formSource, 'Html::redirect') > strrpos($formSource, 'catch (Throwable')
     );
 }
+
+$rightsFormSource = file_get_contents(__DIR__ . '/../front/dashboardrights.form.php');
+assertSameValue(
+    'Banco importado no escopo da página de permissões do GLPI 11',
+    true,
+    is_string($rightsFormSource)
+        && strpos($rightsFormSource, 'global $DB;') < strpos($rightsFormSource, '$DB->request')
+);
 require_once __DIR__ . '/asset_hooks.php';
 
 $savedQuery = SavedQuery::validate([

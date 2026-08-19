@@ -6,6 +6,8 @@ use GlpiPlugin\Biforglpi\Navigation;
 use GlpiPlugin\Biforglpi\SqlLab;
 
 include '../../../inc/includes.php';
+global $DB;
+
 $pluginUrl = Plugin::getWebDir('biforglpi');
 $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
 $dashboardId = filter_var($_POST['dashboards_id'] ?? $_GET['dashboards_id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
