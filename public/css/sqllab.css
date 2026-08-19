@@ -27,6 +27,21 @@
     margin-bottom: 0.25rem;
 }
 
+.biforglpi-dashboard-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.5rem;
+}
+
+.biforglpi-dashboard-actions .form-select {
+    min-width: 12rem;
+}
+
+.biforglpi-dashboard-actions .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .biforglpi-indicator-grid {
     display: grid;
     gap: 1rem;
@@ -165,6 +180,15 @@
     .biforglpi-actions > div,
     .biforglpi-actions .btn {
         width: 100%;
+    }
+
+    .biforglpi-dashboard-actions {
+        width: 100%;
+    }
+
+    .biforglpi-dashboard-actions .form-select {
+        flex: 1 1 auto;
+        min-width: 0;
     }
 
     .biforglpi-widget {
