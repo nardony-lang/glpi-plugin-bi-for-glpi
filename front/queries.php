@@ -14,7 +14,7 @@ $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
 $queries = SavedQuery::all();
 $canManage = Session::haveRight(BiforglpiProfile::RIGHT_MANAGE_QUERIES, UPDATE);
 
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl">
     <?php Navigation::render('queries'); ?>

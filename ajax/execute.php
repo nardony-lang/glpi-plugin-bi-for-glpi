@@ -2,7 +2,8 @@
 
 use GlpiPlugin\Biforglpi\SqlExecutor;
 use GlpiPlugin\Biforglpi\SqlLab;
-use GlpiPlugin\Biforglpi\SqlReadOnlyGuard;
+use GlpiPlugin\Biforglpi\DashboardFilter;
+use GlpiPlugin\Biforglpi\SqlTemplate;
 
 include '../../../inc/includes.php';
 
@@ -19,7 +20,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 Session::checkRight(SqlLab::RIGHT_NAME, READ);
 
 try {
-    $sql = (new SqlReadOnlyGuard())->validate((string) ($_POST['sql'] ?? ''));
+    $context = DashboardFilter::context($_POST);
+    $sql = (new SqlTemplate())->compile((string) ($_POST['sql'] ?? ''), $context);
     $limit = filter_var(
         $_POST['limit'] ?? SqlExecutor::DEFAULT_LIMIT,
         FILTER_VALIDATE_INT,

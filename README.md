@@ -71,6 +71,20 @@ O modo demonstração permite desenhar e homologar painéis mesmo sem chamados o
 SLAs cadastrados. Ao desativá-lo, os componentes executam suas consultas mantendo
 o limite de linhas, o timeout e as proteções de somente leitura.
 
+Na versão 0.4, cada dashboard pode habilitar filtros de **entidade** e **período**.
+As consultas usam variáveis controladas pelo plugin, substituídas com segurança
+somente no momento da execução:
+
+- `{{entity_id}}`;
+- `{{date_start}}`;
+- `{{date_end}}`;
+- `{{date_end_exclusive}}`.
+
+O **Catálogo de indicadores** cria consultas e componentes prontos no dashboard.
+O catálogo inicial inclui total e tempo médio de requisições solucionadas,
+resultados por grupo solucionador e percentual dentro do ANS. As consultas criadas
+continuam editáveis e podem ser abertas no Laboratório SQL.
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 
@@ -126,7 +140,7 @@ php tests/run.php
 ```
 
 O roteiro de homologação da versão em desenvolvimento está em
-[`docs/TESTING-0.3.0.md`](docs/TESTING-0.3.0.md).
+[`docs/TESTING-0.4.0.md`](docs/TESTING-0.4.0.md).
 
 ## Licença
 

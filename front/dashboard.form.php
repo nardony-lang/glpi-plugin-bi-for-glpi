@@ -20,7 +20,7 @@ if ($id > 0) {
 }
 $error = null;
 $redirectUrl = null;
-$dashboard = ['id' => 0, 'name' => '', 'description' => '', 'is_active' => 1, 'is_demo' => 0];
+$dashboard = ['id' => 0, 'name' => '', 'description' => '', 'is_active' => 1, 'is_demo' => 0, 'use_entity_filter' => 1, 'use_period_filter' => 1];
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
@@ -56,7 +56,7 @@ foreach (SavedQuery::all() as $query) {
     $queriesById[(int) $query['id']] = $query;
 }
 
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl">
     <?php Navigation::render('dashboards'); ?>
@@ -71,6 +71,8 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
             <div class="d-flex flex-wrap gap-4">
                 <label class="form-check"><input type="hidden" name="is_active" value="0"><input class="form-check-input" type="checkbox" name="is_active" value="1" <?= !empty($dashboard['is_active']) ? 'checked' : '' ?>><span class="form-check-label"><?= __('Dashboard ativo', 'biforglpi') ?></span></label>
                 <label class="form-check"><input type="hidden" name="is_demo" value="0"><input class="form-check-input" type="checkbox" name="is_demo" value="1" <?= !empty($dashboard['is_demo']) ? 'checked' : '' ?>><span class="form-check-label"><?= __('Usar dados de demonstração', 'biforglpi') ?></span></label>
+                <label class="form-check"><input type="hidden" name="use_entity_filter" value="0"><input class="form-check-input" type="checkbox" name="use_entity_filter" value="1" <?= !empty($dashboard['use_entity_filter']) ? 'checked' : '' ?>><span class="form-check-label"><?= __('Filtro de entidade', 'biforglpi') ?></span></label>
+                <label class="form-check"><input type="hidden" name="use_period_filter" value="0"><input class="form-check-input" type="checkbox" name="use_period_filter" value="1" <?= !empty($dashboard['use_period_filter']) ? 'checked' : '' ?>><span class="form-check-label"><?= __('Filtro de período', 'biforglpi') ?></span></label>
             </div>
             <div class="mt-4 d-flex gap-2"><button class="btn btn-primary" name="save" value="1"><i class="ti ti-device-floppy"></i> <?= __('Salvar dashboard', 'biforglpi') ?></button><a class="btn btn-outline-secondary" href="<?= $escapedPluginUrl ?>/front/dashboards.php"><?= __('Voltar', 'biforglpi') ?></a></div>
             <?php Html::closeForm(); ?>

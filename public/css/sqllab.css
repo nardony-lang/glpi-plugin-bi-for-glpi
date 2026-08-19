@@ -39,6 +39,10 @@
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
 }
 
+.biforglpi-filters .card-body {
+    padding-block: 1rem;
+}
+
 .biforglpi-widget-grid {
     display: grid;
     gap: 1rem;

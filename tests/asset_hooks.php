@@ -71,6 +71,11 @@ namespace {
             return false;
         }
 
+        public function fieldExists(string $table, string $field): bool
+        {
+            return false;
+        }
+
         public function doQuery(string $query): bool
         {
             $this->queries[] = $query;
@@ -148,6 +153,13 @@ namespace {
             'Tabela criada: ' . $table,
             true,
             count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, $table))) > 0
+        );
+    }
+    foreach (['use_entity_filter', 'use_period_filter'] as $field) {
+        assertSameValue(
+            'Campo de filtro no dashboard: ' . $field,
+            true,
+            count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`' . $field . '`'))) > 0
         );
     }
 }

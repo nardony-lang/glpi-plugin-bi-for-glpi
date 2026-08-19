@@ -59,7 +59,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 }
 
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl">
     <?php Navigation::render('queries'); ?>
@@ -97,7 +97,7 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
                 <div class="mb-3">
                     <label class="form-label" for="biforglpi-query-sql"><?= __('Consulta SQL', 'biforglpi') ?></label>
                     <textarea class="form-control font-monospace" id="biforglpi-query-sql" name="query_sql" rows="12" spellcheck="false" required><?= htmlspecialchars((string) $query['query_sql'], ENT_QUOTES, 'UTF-8') ?></textarea>
-                    <div class="form-hint"><?= __('Somente SELECT, WITH e EXPLAIN são aceitos.', 'biforglpi') ?></div>
+                    <div class="form-hint"><?= __('Somente SELECT, WITH e EXPLAIN são aceitos. Variáveis disponíveis: {{entity_id}}, {{date_start}}, {{date_end}} e {{date_end_exclusive}}.', 'biforglpi') ?></div>
                 </div>
 
                 <div class="row g-3">

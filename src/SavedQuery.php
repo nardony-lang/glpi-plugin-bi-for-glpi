@@ -115,7 +115,7 @@ final class SavedQuery
             throw new InvalidArgumentException('A descrição deve ter até 2.000 caracteres.');
         }
 
-        $querySql = (new SqlReadOnlyGuard())->validate((string) ($input['query_sql'] ?? ''));
+        $querySql = (new SqlTemplate())->validate((string) ($input['query_sql'] ?? ''));
         $visualization = (string) ($input['visualization'] ?? self::TYPE_NUMBER);
         if (!in_array($visualization, [self::TYPE_NUMBER, self::TYPE_TABLE], true)) {
             throw new InvalidArgumentException('Tipo de visualização inválido.');
