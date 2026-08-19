@@ -19,7 +19,7 @@ function plugin_init_biforglpi(): void
     global $PLUGIN_HOOKS;
 
     $PLUGIN_HOOKS[Hooks::MENU_TOADD]['biforglpi'] = [
-        'plugins' => SqlLab::class,
+        'tools' => SqlLab::class,
     ];
 
     $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
@@ -44,7 +44,7 @@ function plugin_version_biforglpi(): array
     return [
         'name'         => 'BI for GLPI',
         'version'      => PLUGIN_BIFORGLPI_VERSION,
-        'author'       => 'BI for GLPI contributors',
+        'author'       => 'Douglas Nardoni da Silva',
         'license'      => 'GPL-3.0-or-later',
         'homepage'     => 'https://github.com/nardony-lang/glpi-plugin-bi-for-glpi',
         'requirements' => [

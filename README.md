@@ -19,7 +19,8 @@ git clone https://github.com/nardony-lang/glpi-plugin-bi-for-glpi.git biforglpi
 ```
 
 Depois, no GLPI, acesse **Configuração > Plugins**, instale e ative **BI for GLPI**.
-O Laboratório SQL ficará disponível no menu **Plugins** somente para perfis com o
+O BI for GLPI ficará disponível no menu **Ferramentas** somente para perfis com
+algum direito do módulo. O Laboratório SQL será exibido apenas para perfis com o
 direito específico **Executar consultas SQL**. Na instalação, esse direito é concedido
 apenas ao perfil que instalou o plugin, normalmente o **Super-Admin**. Ele pode ser
 administrado posteriormente em **Administração > Perfis > BI for GLPI**.
@@ -130,3 +131,7 @@ O roteiro de homologação da versão em desenvolvimento está em
 ## Licença
 
 GPL-3.0-or-later. Consulte [LICENSE](LICENSE).
+
+## Autoria
+
+Desenvolvido por **Douglas Nardoni da Silva**.

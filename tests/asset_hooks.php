@@ -110,6 +110,16 @@ namespace {
         ['js/sqllab.js'],
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
+    assertSameValue(
+        'BI for GLPI no menu Ferramentas',
+        ['tools' => \GlpiPlugin\Biforglpi\SqlLab::class],
+        $PLUGIN_HOOKS['menu_toadd']['biforglpi'] ?? null
+    );
+    assertSameValue(
+        'Autor do plugin',
+        'Douglas Nardoni da Silva',
+        plugin_version_biforglpi()['author'] ?? null
+    );
 
     $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/dashboard.php';
     $PLUGIN_HOOKS = [];

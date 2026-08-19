@@ -37,6 +37,13 @@ assertSameValue(
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
 assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
+assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
+$logoInfo = getimagesize(__DIR__ . '/../logo.png');
+assertSameValue(
+    'Logo PNG quadrado e otimizado',
+    [256, 256, 'image/png'],
+    is_array($logoInfo) ? [$logoInfo[0], $logoInfo[1], $logoInfo['mime']] : null
+);
 
 foreach (['dashboard.form.php', 'widget.form.php', 'dashboardrights.form.php'] as $formFile) {
     $formSource = file_get_contents(__DIR__ . '/../front/' . $formFile);
