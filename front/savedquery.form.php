@@ -14,6 +14,7 @@ $pluginUrl = Plugin::getWebDir('biforglpi');
 $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
 $id = filter_var($_POST['id'] ?? $_GET['id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
 $error = null;
+$redirectUrl = null;
 $query = [
     'id'            => 0,
     'name'          => '',
@@ -28,16 +29,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
         if (isset($_POST['delete']) && $id > 0) {
             SavedQuery::delete($id);
-            Html::redirect($pluginUrl . '/front/queries.php?deleted=1');
-        }
-
-        if (isset($_POST['save'])) {
+            $redirectUrl = $pluginUrl . '/front/queries.php?deleted=1';
+        } elseif (isset($_POST['save'])) {
             if ($id > 0) {
                 SavedQuery::update($id, $_POST);
             } else {
                 SavedQuery::create($_POST);
             }
-            Html::redirect($pluginUrl . '/front/queries.php?saved=1');
+            $redirectUrl = $pluginUrl . '/front/queries.php?saved=1';
         }
     } catch (InvalidArgumentException $exception) {
         $error = $exception->getMessage();
@@ -45,6 +44,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     } catch (Throwable) {
         $error = __('Não foi possível concluir a operação. Tente novamente ou consulte os logs do GLPI.', 'biforglpi');
         $query = array_merge($query, $_POST, ['id' => $id]);
+    }
+
+    if ($redirectUrl !== null) {
+        Html::redirect($redirectUrl);
     }
 } elseif ($id > 0) {
     $storedQuery = SavedQuery::find($id);
