@@ -1,8 +1,7 @@
 # BI for GLPI
 
-Plugin inicial de Business Intelligence para GLPI 11. A primeira entrega inclui um
-**Laboratório SQL** administrativo, com consultas somente leitura e visualização dos
-resultados em tabela.
+Plugin de Business Intelligence para GLPI 11. Inclui um **Laboratório SQL** seguro,
+consultas salvas, indicadores numéricos e um dashboard inicial.
 
 ## Compatibilidade
 
@@ -44,6 +43,32 @@ Proteções incluídas:
 - medição do tempo de execução e indicação de resultado truncado;
 - renderização de células com `textContent`, sem interpretar HTML retornado pelo banco.
 
+## Consultas salvas e dashboard
+
+Perfis autorizados podem salvar consultas como:
+
+- **Indicador numérico**: usa o primeiro valor retornado para montar um cartão;
+- **Tabela**: fica disponível para abertura no Laboratório SQL.
+
+Exemplo de indicador:
+
+```sql
+SELECT COUNT(*) AS total
+FROM glpi_tickets
+WHERE status IN (2, 3)
+  AND is_deleted = 0
+```
+
+O dashboard executa até 12 indicadores ativos, mantendo o limite de tempo e as
+proteções de somente leitura. Consultas salvas devem aplicar os filtros de entidade
+necessários para o público autorizado a visualizar o dashboard.
+
+Permissões disponíveis em **Administração > Perfis > BI for GLPI**:
+
+- visualizar dashboards;
+- visualizar ou gerenciar consultas salvas;
+- executar consultas no Laboratório SQL.
+
 > A validação do plugin é uma camada de defesa da aplicação. Em produção, aplique
 > também o princípio do menor privilégio no banco e, para análises pesadas, prefira
 > uma réplica de leitura. As consultas são executadas pela conexão configurada no GLPI.
@@ -64,6 +89,7 @@ front/      página do plugin
 install/    rotinas de instalação
 public/     estilos e JavaScript públicos exigidos pelo GLPI 11
 src/        classes do domínio
+tests/      testes das regras, assets, permissões e instalação
 hook.php    hooks de instalação e remoção
 setup.php   metadados e inicialização do plugin
 ```
@@ -81,6 +107,9 @@ Execute também os testes das regras de segurança e do timeout:
 ```bash
 php tests/run.php
 ```
+
+O roteiro de homologação da versão em desenvolvimento está em
+[`docs/TESTING-0.2.0.md`](docs/TESTING-0.2.0.md).
 
 ## Licença
 

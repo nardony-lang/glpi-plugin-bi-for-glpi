@@ -23,16 +23,22 @@ final class SqlLab extends CommonGLPI
             return [];
         }
 
+        $page = Session::haveRight(Profile::RIGHT_VIEW_DASHBOARD, READ)
+            ? '/plugins/biforglpi/front/dashboard.php'
+            : '/plugins/biforglpi/front/sqllab.php';
+
         return [
             'title' => self::getMenuName(),
-            'page'  => '/plugins/biforglpi/front/sqllab.php',
+            'page'  => $page,
             'icon'  => 'ti ti-chart-bar',
-            'links' => ['search' => '/plugins/biforglpi/front/sqllab.php'],
+            'links' => ['search' => $page],
         ];
     }
 
     public static function canView(): bool
     {
-        return Session::haveRight(self::RIGHT_NAME, READ);
+        return Session::haveRight(self::RIGHT_NAME, READ)
+            || Session::haveRight(Profile::RIGHT_VIEW_DASHBOARD, READ)
+            || Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ);
     }
 }
