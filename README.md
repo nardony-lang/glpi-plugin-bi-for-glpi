@@ -68,6 +68,10 @@ Cada dashboard armazena seus próprios componentes e pode combinar:
 - Gauge (velocímetro) com mínimo, máximo, meta, unidade e faixas de cores;
 - dados reais das consultas ou dados JSON de demonstração.
 
+O **Editor visual** permite reorganizar componentes por arraste ou pelos botões de
+movimento, visualizar e alterar suas larguras, duplicar, excluir e salvar todo o
+layout em uma única operação.
+
 O modo demonstração permite desenhar e homologar painéis mesmo sem chamados ou
 SLAs cadastrados. Ao desativá-lo, os componentes executam suas consultas mantendo
 o limite de linhas, o timeout e as proteções de somente leitura.

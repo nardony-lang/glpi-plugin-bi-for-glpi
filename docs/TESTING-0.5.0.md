@@ -22,6 +22,17 @@
 3. Em um dashboard de demonstração, confirme o valor de exemplo e a renderização responsiva.
 4. Em dados reais sem SLA, confirme o estado **Sem valor numérico para gerar o Gauge**.
 
+## Editor visual
+
+1. Abra **Meus dashboards > Configurar** em um dashboard com três ou mais componentes.
+2. Arraste os componentes para uma nova ordem e clique em **Salvar layout**.
+3. Recarregue a página e confirme que a ordem foi preservada no editor e no dashboard.
+4. Use os botões para cima e para baixo e confirme a nova ordem.
+5. Troque as larguras entre `3/12`, `4/12`, `6/12`, `8/12` e `12/12` e salve.
+6. Duplique um componente e confirme que consulta, visualização, largura, dados de demonstração e configuração do Gauge foram copiados.
+7. Exclua a cópia e confirme a mensagem de sucesso.
+8. Em tela pequena, confirme que os componentes ocupam a largura completa e os botões continuam utilizáveis.
+
 ## Regressão
 
 1. Confirme indicadores numéricos, tabelas, barras, linhas e roscas.

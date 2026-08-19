@@ -35,6 +35,9 @@ function plugin_init_biforglpi(): void
     if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/widget.form.php')) {
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/widget.js';
     }
+    if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/dashboard.form.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/builder.js';
+    }
 
     Plugin::registerClass(BiforglpiProfile::class, [
         'addtabon' => Profile::class,

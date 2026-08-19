@@ -144,6 +144,15 @@ namespace {
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
 
+    $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/dashboard.form.php';
+    $PLUGIN_HOOKS = [];
+    plugin_init_biforglpi();
+    assertSameValue(
+        'JavaScript do editor visual no GLPI 11',
+        ['js/builder.js'],
+        $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
+    );
+
     $DB = new BiforglpiTestDb();
     require_once __DIR__ . '/../install/install.php';
     assertSameValue('Instalação da tabela de consultas', true, plugin_biforglpi_run_install());

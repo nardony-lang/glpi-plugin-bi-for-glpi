@@ -142,6 +142,86 @@ final class DashboardWidget
         ];
     }
 
+    /** @param list<mixed> $widgetIds @param array<int|string,mixed> $widths */
+    public static function updateLayout(int $dashboardId, array $widgetIds, array $widths): void
+    {
+        global $DB;
+        DashboardAccess::checkEdit($dashboardId);
+        $widgets = self::allForDashboard($dashboardId);
+        $allowedIds = array_map(static fn(array $widget): int => (int) $widget['id'], $widgets);
+        $layout = self::normalizeLayout($widgetIds, $widths, $allowedIds);
+        $now = date('Y-m-d H:i:s');
+        foreach ($layout as $item) {
+            if (!$DB->update(self::TABLE, [
+                'position' => $item['position'],
+                'width' => $item['width'],
+                'date_mod' => $now,
+            ], ['id' => $item['id'], 'dashboards_id' => $dashboardId])) {
+                throw new RuntimeException('Não foi possível salvar o layout do dashboard.');
+            }
+        }
+    }
+
+    public static function duplicate(int $id): int
+    {
+        global $DB;
+        $widget = self::find($id);
+        if ($widget === null) {
+            throw new InvalidArgumentException('Componente não encontrado.');
+        }
+        $dashboardId = (int) $widget['dashboards_id'];
+        DashboardAccess::checkEdit($dashboardId);
+        $position = 0;
+        foreach (self::allForDashboard($dashboardId) as $existing) {
+            $position = max($position, (int) $existing['position'] + 1);
+        }
+        $title = trim((string) ($widget['title'] ?? ''));
+        $now = date('Y-m-d H:i:s');
+        if (!$DB->insert(self::TABLE, [
+            'dashboards_id' => $dashboardId,
+            'savedqueries_id' => (int) $widget['savedqueries_id'],
+            'title' => $title !== '' ? substr($title, 0, 240) . ' (cópia)' : null,
+            'widget_type' => (string) $widget['widget_type'],
+            'position' => $position,
+            'width' => (int) $widget['width'],
+            'demo_data' => ($widget['demo_data'] ?? null) ?: null,
+            'settings_json' => ($widget['settings_json'] ?? null) ?: null,
+            'date_creation' => $now,
+            'date_mod' => $now,
+        ])) {
+            throw new RuntimeException('Não foi possível duplicar o componente.');
+        }
+        return (int) $DB->insertId();
+    }
+
+    /**
+     * @param list<mixed> $widgetIds
+     * @param array<int|string,mixed> $widths
+     * @param list<int> $allowedIds
+     * @return list<array{id:int,width:int,position:int}>
+     */
+    public static function normalizeLayout(array $widgetIds, array $widths, array $allowedIds): array
+    {
+        $layout = [];
+        $seen = [];
+        foreach ($widgetIds as $index => $rawId) {
+            $id = filter_var($rawId, FILTER_VALIDATE_INT);
+            if ($id === false || !in_array((int) $id, $allowedIds, true) || isset($seen[(int) $id])) {
+                throw new InvalidArgumentException('O layout contém um componente inválido.');
+            }
+            $width = filter_var($widths[(int) $id] ?? null, FILTER_VALIDATE_INT);
+            if ($width === false || !in_array((int) $width, [3, 4, 6, 8, 12], true)) {
+                throw new InvalidArgumentException('O layout contém uma largura inválida.');
+            }
+            $seen[(int) $id] = true;
+            $layout[] = ['id' => (int) $id, 'width' => (int) $width, 'position' => $index];
+        }
+        if (count($seen) !== count($allowedIds)) {
+            throw new InvalidArgumentException('Atualize a página antes de salvar o layout.');
+        }
+        return $layout;
+    }
+
     /** @param array<string, mixed> $input */
     private static function validateSettings(array $input, string $type): ?string
     {

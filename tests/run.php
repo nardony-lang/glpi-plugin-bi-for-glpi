@@ -44,6 +44,7 @@ assertSameValue(
 );
 assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
 assertSameValue('JavaScript de configuração do Gauge', true, is_file(__DIR__ . '/../public/js/widget.js'));
+assertSameValue('JavaScript do editor visual', true, is_file(__DIR__ . '/../public/js/builder.js'));
 assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
 $logoInfo = getimagesize(__DIR__ . '/../logo.png');
 assertSameValue(
@@ -177,6 +178,29 @@ try {
 }
 
 assertSameValue('Indicador de ANS usa Gauge', 'gauge', $catalog['within_sla']['widget_type'] ?? null);
+
+assertSameValue(
+    'Layout normalizado na ordem visual',
+    [
+        ['id' => 12, 'width' => 8, 'position' => 0],
+        ['id' => 11, 'width' => 4, 'position' => 1],
+    ],
+    DashboardWidget::normalizeLayout([12, 11], [11 => 4, 12 => 8], [11, 12])
+);
+foreach (
+    [
+        [[11], [11 => 4], [11, 12]],
+        [[11, 99], [11 => 4, 99 => 4], [11, 12]],
+        [[11, 12], [11 => 5, 12 => 4], [11, 12]],
+    ] as [$layoutIds, $layoutWidths, $allowedIds]
+) {
+    try {
+        DashboardWidget::normalizeLayout($layoutIds, $layoutWidths, $allowedIds);
+        throw new RuntimeException('Layout inválido foi aceito.');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
 
 try {
     DashboardWidget::validate([
