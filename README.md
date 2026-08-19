@@ -93,6 +93,10 @@ continuam editáveis e podem ser abertas no Laboratório SQL.
 O Gauge utiliza o primeiro valor numérico retornado pela consulta. Sua configuração
 permite definir faixas crítica, de atenção e de sucesso, além de uma marca de meta.
 
+Cartões numéricos podem usar formatação automática ou de zero a seis casas
+decimais, prefixo, sufixo, meta e cores condicionais. As regras de cor usam duas
+faixas configuráveis e consideram valores maiores como melhores.
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 

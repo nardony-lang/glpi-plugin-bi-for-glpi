@@ -25,6 +25,7 @@ final class WidgetRenderer
                 $elapsedMs = $result['elapsed_ms'];
             }
 
+            $number = $this->numberData($rows, $widget);
             return [
                 'ok' => true,
                 'empty' => $rows === [],
@@ -33,7 +34,8 @@ final class WidgetRenderer
                 'elapsed_ms' => $elapsedMs,
                 'chart' => $this->chartData($rows),
                 'gauge' => $this->gaugeData($rows, $widget),
-                'value' => $this->numberValue($rows),
+                'number' => $number,
+                'value' => $number['value'],
             ];
         } catch (Throwable) {
             return [
@@ -60,19 +62,45 @@ final class WidgetRenderer
     }
 
     /** @param list<array<string, mixed>> $rows */
-    private function numberValue(array $rows): string
+    private function numberData(array $rows, array $widget): array
     {
         if ($rows === [] || $rows[0] === [] || reset($rows[0]) === null) {
-            return __('Sem dados', 'biforglpi');
+            return ['value' => __('Sem dados', 'biforglpi'), 'color' => null, 'target' => null];
         }
         $value = reset($rows[0]);
+        $settings = array_merge(
+            DashboardWidget::defaultNumberSettings(),
+            is_array($widget['settings'] ?? null) ? $widget['settings'] : []
+        );
         if (!is_numeric($value)) {
-            return (string) $value;
+            return [
+                'value' => (string) $settings['prefix'] . (string) $value . (string) $settings['suffix'],
+                'color' => null,
+                'target' => null,
+            ];
         }
         $number = (float) $value;
-        return floor($number) === $number
-            ? number_format($number, 0, ',', '.')
-            : number_format($number, 2, ',', '.');
+        $decimals = (int) $settings['decimals'];
+        if ($decimals < 0) {
+            $decimals = floor($number) === $number ? 0 : 2;
+        }
+        $format = static fn(float $numeric): string => (string) $settings['prefix']
+            . number_format($numeric, $decimals, ',', '.')
+            . (string) $settings['suffix'];
+        $color = null;
+        if (!empty($settings['use_colors'])) {
+            $candidate = $number < (float) $settings['warning']
+                ? (string) $settings['color_low']
+                : ($number < (float) $settings['success'] ? (string) $settings['color_mid'] : (string) $settings['color_high']);
+            if (preg_match('/^#[0-9a-f]{6}$/i', $candidate) === 1) {
+                $color = strtolower($candidate);
+            }
+        }
+        return [
+            'value' => $format($number),
+            'color' => $color,
+            'target' => $settings['target'] !== null ? $format((float) $settings['target']) : null,
+        ];
     }
 
     /** @param list<array<string, mixed>> $rows @param array<string, mixed> $widget @return array<string, mixed>|null */

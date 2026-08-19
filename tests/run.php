@@ -8,6 +8,7 @@ use GlpiPlugin\Biforglpi\DashboardWidget;
 use GlpiPlugin\Biforglpi\DashboardFilter;
 use GlpiPlugin\Biforglpi\IndicatorCatalog;
 use GlpiPlugin\Biforglpi\SqlTemplate;
+use GlpiPlugin\Biforglpi\WidgetRenderer;
 
 require_once __DIR__ . '/../src/SqlQueryTimeout.php';
 require_once __DIR__ . '/../src/SqlReadOnlyGuard.php';
@@ -19,6 +20,7 @@ require_once __DIR__ . '/../src/DashboardAccess.php';
 require_once __DIR__ . '/../src/DashboardWidget.php';
 require_once __DIR__ . '/../src/DashboardFilter.php';
 require_once __DIR__ . '/../src/IndicatorCatalog.php';
+require_once __DIR__ . '/../src/WidgetRenderer.php';
 
 function assertSameValue(string $label, mixed $expected, mixed $actual): void
 {
@@ -162,6 +164,58 @@ $gaugeSettings = json_decode((string) $gaugeWidget['settings_json'], true);
 assertSameValue('Componente Gauge', 'gauge', $gaugeWidget['widget_type']);
 assertSameValue('Meta do Gauge', 95.0, isset($gaugeSettings['target']) ? (float) $gaugeSettings['target'] : null);
 assertSameValue('Unidade do Gauge', '%', $gaugeSettings['unit'] ?? null);
+
+$numberWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'number',
+    'number_decimals' => 2,
+    'number_prefix' => 'R$ ',
+    'number_suffix' => '',
+    'number_target' => 95,
+    'number_use_colors' => 1,
+    'number_warning' => 80,
+    'number_success' => 95,
+    'number_color_low' => '#d63939',
+    'number_color_mid' => '#f59f00',
+    'number_color_high' => '#2fb344',
+]);
+$numberSettings = json_decode((string) $numberWidget['settings_json'], true);
+assertSameValue('Casas decimais do indicador', 2, $numberSettings['decimals'] ?? null);
+assertSameValue('Prefixo do indicador', 'R$ ', $numberSettings['prefix'] ?? null);
+$formattedNumber = (new WidgetRenderer())->prepare(
+    ['widget_type' => 'number', 'demo_data' => '[{"valor":92}]', 'settings' => $numberSettings],
+    ['query_sql' => 'SELECT 92', 'row_limit' => 1],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Valor numérico formatado', 'R$ 92,00', $formattedNumber['number']['value'] ?? null);
+assertSameValue('Cor condicional de atenção', '#f59f00', $formattedNumber['number']['color'] ?? null);
+assertSameValue('Meta numérica formatada', 'R$ 95,00', $formattedNumber['number']['target'] ?? null);
+
+$formattedDuration = (new WidgetRenderer())->prepare(
+    ['widget_type' => 'number', 'demo_data' => '[{"media_resolucao":"00:20:54"}]'],
+    ['query_sql' => 'SELECT "00:20:54"', 'row_limit' => 1],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Duração textual preservada', '00:20:54', $formattedDuration['number']['value'] ?? null);
+
+foreach (
+    [
+        ['number_decimals' => 7],
+        ['number_warning' => 95, 'number_success' => 80],
+    ] as $invalidNumberSettings
+) {
+    try {
+        DashboardWidget::validate(array_merge([
+            'savedqueries_id' => 1,
+            'widget_type' => 'number',
+        ], $invalidNumberSettings));
+        throw new RuntimeException('Configuração numérica inválida foi aceita.');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
 
 try {
     DashboardWidget::validate([

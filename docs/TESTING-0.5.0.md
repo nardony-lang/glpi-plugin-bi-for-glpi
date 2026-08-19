@@ -33,6 +33,17 @@
 7. Exclua a cópia e confirme a mensagem de sucesso.
 8. Em tela pequena, confirme que os componentes ocupam a largura completa e os botões continuam utilizáveis.
 
+## Formatação de indicadores numéricos
+
+1. Edite um componente do tipo **Indicador numérico**.
+2. Teste o modo automático e depois selecione duas casas decimais.
+3. Informe prefixo `R$ `, uma meta e confirme a apresentação no cartão.
+4. Troque para sufixo `%` e confirme que ele aparece após o valor.
+5. Ative as cores condicionais com atenção `80` e sucesso `95`.
+6. Teste valores abaixo de `80`, entre `80` e `94,99` e a partir de `95`.
+7. Desative as cores e confirme que o cartão volta à cor padrão.
+8. Confirme que indicadores textuais, como tempo em `HH:MM:SS`, continuam funcionando no modo automático.
+
 ## Regressão
 
 1. Confirme indicadores numéricos, tabelas, barras, linhas e roscas.

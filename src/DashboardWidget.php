@@ -27,6 +27,23 @@ final class DashboardWidget
         ];
     }
 
+    /** @return array<string, float|int|string|null> */
+    public static function defaultNumberSettings(): array
+    {
+        return [
+            'decimals' => -1,
+            'prefix' => '',
+            'suffix' => '',
+            'target' => null,
+            'use_colors' => 0,
+            'warning' => 80.0,
+            'success' => 95.0,
+            'color_low' => '#d63939',
+            'color_mid' => '#f59f00',
+            'color_high' => '#2fb344',
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     public static function allForDashboard(int $dashboardId): array
     {
@@ -225,10 +242,18 @@ final class DashboardWidget
     /** @param array<string, mixed> $input */
     private static function validateSettings(array $input, string $type): ?string
     {
+        if ($type === 'number') {
+            return self::validateNumberSettings($input);
+        }
         if ($type !== 'gauge') {
             return null;
         }
+        return self::validateGaugeSettings($input);
+    }
 
+    /** @param array<string, mixed> $input */
+    private static function validateGaugeSettings(array $input): string
+    {
         $provided = [];
         $encoded = trim((string) ($input['settings_json'] ?? ''));
         if ($encoded !== '') {
@@ -291,6 +316,69 @@ final class DashboardWidget
         return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
+    /** @param array<string, mixed> $input */
+    private static function validateNumberSettings(array $input): string
+    {
+        $provided = [];
+        $encoded = trim((string) ($input['settings_json'] ?? ''));
+        if ($encoded !== '') {
+            try {
+                $decoded = json_decode($encoded, true, 16, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw new InvalidArgumentException('A configuração do indicador numérico é inválida.', 0, $exception);
+            }
+            if (!is_array($decoded)) {
+                throw new InvalidArgumentException('A configuração do indicador numérico é inválida.');
+            }
+            $provided = $decoded;
+        }
+
+        $defaults = self::defaultNumberSettings();
+        $decimals = filter_var($input['number_decimals'] ?? $provided['decimals'] ?? $defaults['decimals'], FILTER_VALIDATE_INT);
+        if ($decimals === false || $decimals < -1 || $decimals > 6) {
+            throw new InvalidArgumentException('As casas decimais devem estar entre 0 e 6, ou no modo automático.');
+        }
+        $prefix = (string) ($input['number_prefix'] ?? $provided['prefix'] ?? $defaults['prefix']);
+        $suffix = (string) ($input['number_suffix'] ?? $provided['suffix'] ?? $defaults['suffix']);
+        if (strlen($prefix) > 20 || strlen($suffix) > 20) {
+            throw new InvalidArgumentException('Prefixo e sufixo devem ter até 20 caracteres.');
+        }
+
+        $targetValue = $input['number_target'] ?? $provided['target'] ?? $defaults['target'];
+        $target = null;
+        if ($targetValue !== '' && $targetValue !== null) {
+            $target = filter_var($targetValue, FILTER_VALIDATE_FLOAT);
+            if ($target === false) {
+                throw new InvalidArgumentException('A meta do indicador deve ser numérica.');
+            }
+            $target = (float) $target;
+        }
+
+        $warning = filter_var($input['number_warning'] ?? $provided['warning'] ?? $defaults['warning'], FILTER_VALIDATE_FLOAT);
+        $success = filter_var($input['number_success'] ?? $provided['success'] ?? $defaults['success'], FILTER_VALIDATE_FLOAT);
+        if ($warning === false || $success === false || $warning > $success) {
+            throw new InvalidArgumentException('As faixas do indicador devem estar em ordem crescente.');
+        }
+
+        $settings = [
+            'decimals' => (int) $decimals,
+            'prefix' => $prefix,
+            'suffix' => $suffix,
+            'target' => $target,
+            'use_colors' => !empty($input['number_use_colors'] ?? $provided['use_colors'] ?? 0) ? 1 : 0,
+            'warning' => (float) $warning,
+            'success' => (float) $success,
+        ];
+        foreach (['color_low', 'color_mid', 'color_high'] as $field) {
+            $color = strtolower((string) ($input['number_' . $field] ?? $provided[$field] ?? $defaults[$field]));
+            if (preg_match('/^#[0-9a-f]{6}$/', $color) !== 1) {
+                throw new InvalidArgumentException('As cores do indicador devem estar no formato hexadecimal.');
+            }
+            $settings[$field] = $color;
+        }
+        return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
+
     /** @param array<string, mixed> $row @return array<string, mixed> */
     private static function castRow(array $row): array
     {
@@ -301,6 +389,8 @@ final class DashboardWidget
         $row['settings'] = is_array($settings) ? $settings : [];
         if ($row['widget_type'] === 'gauge') {
             $row['settings'] = array_merge(self::defaultGaugeSettings(), $row['settings']);
+        } elseif ($row['widget_type'] === 'number') {
+            $row['settings'] = array_merge(self::defaultNumberSettings(), $row['settings']);
         }
         return $row;
     }
