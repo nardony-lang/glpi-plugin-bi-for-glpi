@@ -2,9 +2,12 @@
 
 use GlpiPlugin\Biforglpi\SqlQueryTimeout;
 use GlpiPlugin\Biforglpi\SqlReadOnlyGuard;
+use GlpiPlugin\Biforglpi\SavedQuery;
 
 require_once __DIR__ . '/../src/SqlQueryTimeout.php';
 require_once __DIR__ . '/../src/SqlReadOnlyGuard.php';
+require_once __DIR__ . '/../src/SqlExecutor.php';
+require_once __DIR__ . '/../src/SavedQuery.php';
 
 function assertSameValue(string $label, mixed $expected, mixed $actual): void
 {
@@ -29,6 +32,30 @@ assertSameValue(
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
 require_once __DIR__ . '/asset_hooks.php';
+
+$savedQuery = SavedQuery::validate([
+    'name'          => 'Chamados em atendimento',
+    'description'   => 'Total de chamados atribuídos ou planejados',
+    'query_sql'     => 'SELECT COUNT(*) AS total FROM glpi_tickets WHERE status IN (2, 3)',
+    'visualization' => SavedQuery::TYPE_NUMBER,
+    'row_limit'     => 1,
+    'is_active'     => 1,
+]);
+assertSameValue('Nome da consulta salva', 'Chamados em atendimento', $savedQuery['name']);
+assertSameValue('Tipo de indicador salvo', SavedQuery::TYPE_NUMBER, $savedQuery['visualization']);
+assertSameValue('Consulta salva ativa', 1, $savedQuery['is_active']);
+
+try {
+    SavedQuery::validate([
+        'name'          => 'Consulta perigosa',
+        'query_sql'     => 'DELETE FROM glpi_tickets',
+        'visualization' => SavedQuery::TYPE_TABLE,
+        'row_limit'     => 100,
+    ]);
+    throw new RuntimeException('Uma consulta salva perigosa foi aceita.');
+} catch (InvalidArgumentException) {
+    // Expected.
+}
 
 $timeout = new SqlQueryTimeout(10);
 assertSameValue(

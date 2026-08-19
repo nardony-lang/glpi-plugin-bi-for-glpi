@@ -1,5 +1,8 @@
 <?php
 
+use GlpiPlugin\Biforglpi\Navigation;
+use GlpiPlugin\Biforglpi\Profile;
+use GlpiPlugin\Biforglpi\SavedQuery;
 use GlpiPlugin\Biforglpi\SqlExecutor;
 use GlpiPlugin\Biforglpi\SqlLab;
 
@@ -9,10 +12,25 @@ Session::checkRight(SqlLab::RIGHT_NAME, READ);
 
 $pluginUrl = Plugin::getWebDir('biforglpi');
 $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
+$initialSql = "SELECT id, name, date_mod\nFROM glpi_computers\nORDER BY date_mod DESC";
+$initialLimit = SqlExecutor::DEFAULT_LIMIT;
+$initialQueryName = null;
+
+$savedQueryId = filter_input(INPUT_GET, 'saved_query_id', FILTER_VALIDATE_INT);
+if ($savedQueryId && Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ)) {
+    $savedQuery = SavedQuery::find((int) $savedQueryId);
+    if ($savedQuery !== null) {
+        $initialSql = (string) $savedQuery['query_sql'];
+        $initialLimit = (int) $savedQuery['row_limit'];
+        $initialQueryName = (string) $savedQuery['name'];
+    }
+}
 
 Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl" data-endpoint="<?= $escapedPluginUrl ?>/ajax/execute.php">
+    <?php Navigation::render('lab'); ?>
+
     <section class="card biforglpi-card">
         <div class="card-header">
             <div>
@@ -25,6 +43,14 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
         </div>
 
         <div class="card-body">
+            <?php if ($initialQueryName !== null): ?>
+                <div class="alert alert-success" role="status">
+                    <?= sprintf(
+                        __('Consulta salva carregada: %s', 'biforglpi'),
+                        htmlspecialchars($initialQueryName, ENT_QUOTES, 'UTF-8')
+                    ) ?>
+                </div>
+            <?php endif; ?>
             <div class="alert alert-info" role="status">
                 <?= sprintf(
                     __('Permitidos: SELECT, WITH e EXPLAIN. Escritas, comentários e múltiplas instruções são bloqueados. Tempo máximo: %d segundos.', 'biforglpi'),
@@ -43,9 +69,7 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
                     rows="10"
                     spellcheck="false"
                     required
-                >SELECT id, name, date_mod
-FROM glpi_computers
-ORDER BY date_mod DESC</textarea>
+                ><?= htmlspecialchars($initialSql, ENT_QUOTES, 'UTF-8') ?></textarea>
 
                 <div class="biforglpi-actions mt-3">
                     <div>
@@ -57,7 +81,7 @@ ORDER BY date_mod DESC</textarea>
                             type="number"
                             min="1"
                             max="<?= SqlExecutor::MAX_LIMIT ?>"
-                            value="<?= SqlExecutor::DEFAULT_LIMIT ?>"
+                            value="<?= $initialLimit ?>"
                         >
                     </div>
                     <button class="btn btn-primary align-self-end" id="biforglpi-run" type="submit">

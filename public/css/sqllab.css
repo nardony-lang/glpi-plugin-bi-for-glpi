@@ -7,6 +7,68 @@
     box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 6%);
 }
 
+.biforglpi-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.biforglpi-page-heading {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.biforglpi-page-heading h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.biforglpi-indicator-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.biforglpi-indicator-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.biforglpi-indicator-value {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.biforglpi-empty {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.biforglpi-empty > i {
+    color: var(--tblr-secondary);
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.biforglpi-query-link {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
 .biforglpi-card .card-header {
     align-items: center;
     display: flex;
@@ -48,6 +110,12 @@
 }
 
 @media (max-width: 576px) {
+    .biforglpi-page-heading,
+    .biforglpi-query-link {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
     .biforglpi-actions {
         align-items: stretch;
         flex-direction: column;

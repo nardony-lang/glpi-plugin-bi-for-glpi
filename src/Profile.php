@@ -9,6 +9,9 @@ use Session;
 
 final class Profile extends \Profile
 {
+    public const RIGHT_VIEW_DASHBOARD = 'plugin_biforglpi_dashboard';
+    public const RIGHT_MANAGE_QUERIES = 'plugin_biforglpi_queries';
+
     public static $rightname = 'profile';
 
     public static function getTypeName($nb = 0): string
@@ -40,11 +43,26 @@ final class Profile extends \Profile
     /** @return list<array<string, mixed>> */
     public static function getAllRights(): array
     {
-        return [[
-            'rights' => [READ => __('Executar consultas SQL', 'biforglpi')],
-            'label'  => __('Laboratório SQL', 'biforglpi'),
-            'field'  => SqlLab::RIGHT_NAME,
-        ]];
+        return [
+            [
+                'rights' => [READ => __('Visualizar dashboards', 'biforglpi')],
+                'label'  => __('Dashboards', 'biforglpi'),
+                'field'  => self::RIGHT_VIEW_DASHBOARD,
+            ],
+            [
+                'rights' => [
+                    READ   => __('Visualizar consultas salvas', 'biforglpi'),
+                    UPDATE => __('Gerenciar consultas salvas', 'biforglpi'),
+                ],
+                'label' => __('Consultas salvas', 'biforglpi'),
+                'field' => self::RIGHT_MANAGE_QUERIES,
+            ],
+            [
+                'rights' => [READ => __('Executar consultas SQL', 'biforglpi')],
+                'label'  => __('Laboratório SQL', 'biforglpi'),
+                'field'  => SqlLab::RIGHT_NAME,
+            ],
+        ];
     }
 
     public function showPluginRights(int $profilesId): void
@@ -84,15 +102,20 @@ final class Profile extends \Profile
 
     public static function installRights(): bool
     {
-        $rightWasCreated = false;
-        if (countElementsInTable('glpi_profilerights', ['name' => SqlLab::RIGHT_NAME]) === 0) {
-            if (!ProfileRight::addProfileRights([SqlLab::RIGHT_NAME])) {
+        $createdRights = [];
+        foreach (self::getAllRights() as $definition) {
+            $field = (string) $definition['field'];
+            if (countElementsInTable('glpi_profilerights', ['name' => $field]) > 0) {
+                continue;
+            }
+
+            if (!ProfileRight::addProfileRights([$field])) {
                 return false;
             }
-            $rightWasCreated = true;
+            $createdRights[$field] = array_keys($definition['rights']);
         }
 
-        if (!$rightWasCreated || !isset($_SESSION['glpiactiveprofile']['id'])) {
+        if ($createdRights === [] || !isset($_SESSION['glpiactiveprofile']['id'])) {
             return true;
         }
 
@@ -102,20 +125,35 @@ final class Profile extends \Profile
             return false;
         }
 
-        if (!$profile->update([
-            'id' => $profilesId,
-            '_' . SqlLab::RIGHT_NAME => [READ => 1],
-        ])) {
+        $input = ['id' => $profilesId];
+        foreach ($createdRights as $field => $rights) {
+            $input['_' . $field] = array_fill_keys($rights, 1);
+        }
+
+        if (!$profile->update($input)) {
             return false;
         }
 
-        $_SESSION['glpiactiveprofile'][SqlLab::RIGHT_NAME] = READ;
+        foreach ($createdRights as $field => $rights) {
+            $_SESSION['glpiactiveprofile'][$field] = array_reduce(
+                $rights,
+                static fn(int $value, int $right): int => $value | $right,
+                0
+            );
+        }
         return true;
     }
 
     public static function uninstallRights(): bool
     {
-        unset($_SESSION['glpiactiveprofile'][SqlLab::RIGHT_NAME]);
-        return ProfileRight::deleteProfileRights([SqlLab::RIGHT_NAME]);
+        $fields = array_map(
+            static fn(array $definition): string => (string) $definition['field'],
+            self::getAllRights()
+        );
+        foreach ($fields as $field) {
+            unset($_SESSION['glpiactiveprofile'][$field]);
+        }
+
+        return ProfileRight::deleteProfileRights($fields);
     }
 }
