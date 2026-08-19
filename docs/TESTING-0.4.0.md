@@ -4,7 +4,7 @@
 
 1. Atualize a branch de homologação no diretório `plugins/biforglpi`.
 2. Acesse **Configuração > Plugins** e execute a atualização do BI for GLPI.
-3. Confirme que a versão exibida é `0.4.0-rc1` e que o módulo permanece em **Ferramentas**.
+3. Confirme que a versão exibida é `0.4.0` e que o módulo permanece em **Ferramentas**.
 
 ## Filtros do dashboard
 
