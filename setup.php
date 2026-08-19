@@ -10,7 +10,7 @@ use Glpi\Plugin\Hooks;
 use GlpiPlugin\Biforglpi\Profile as BiforglpiProfile;
 use GlpiPlugin\Biforglpi\SqlLab;
 
-define('PLUGIN_BIFORGLPI_VERSION', '0.1.1');
+define('PLUGIN_BIFORGLPI_VERSION', '0.1.2');
 define('PLUGIN_BIFORGLPI_MIN_GLPI_VERSION', '11.0.0');
 define('PLUGIN_BIFORGLPI_MAX_GLPI_VERSION', '12.0.0');
 
@@ -21,6 +21,12 @@ function plugin_init_biforglpi(): void
     $PLUGIN_HOOKS[Hooks::MENU_TOADD]['biforglpi'] = [
         'plugins' => SqlLab::class,
     ];
+
+    $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/sqllab.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_CSS]['biforglpi'][] = 'css/sqllab.css';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/sqllab.js';
+    }
 
     Plugin::registerClass(BiforglpiProfile::class, [
         'addtabon' => Profile::class,

@@ -18,6 +18,18 @@ function assertSameValue(string $label, mixed $expected, mixed $actual): void
     }
 }
 
+assertSameValue(
+    'CSS no diretório público do GLPI 11',
+    true,
+    is_file(__DIR__ . '/../public/css/sqllab.css')
+);
+assertSameValue(
+    'JavaScript no diretório público do GLPI 11',
+    true,
+    is_file(__DIR__ . '/../public/js/sqllab.js')
+);
+require_once __DIR__ . '/asset_hooks.php';
+
 $timeout = new SqlQueryTimeout(10);
 assertSameValue(
     'Timeout MySQL',
