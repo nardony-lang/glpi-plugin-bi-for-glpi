@@ -12,8 +12,6 @@ $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
 
 Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
 ?>
-<link rel="stylesheet" href="<?= $escapedPluginUrl ?>/css/sqllab.css?v=<?= PLUGIN_BIFORGLPI_VERSION ?>">
-
 <main class="biforglpi-lab container-xl" data-endpoint="<?= $escapedPluginUrl ?>/ajax/execute.php">
     <section class="card biforglpi-card">
         <div class="card-header">
@@ -82,7 +80,5 @@ ORDER BY date_mod DESC</textarea>
         </div>
     </section>
 </main>
-
-<script src="<?= $escapedPluginUrl ?>/js/sqllab.js?v=<?= PLUGIN_BIFORGLPI_VERSION ?>" defer></script>
 <?php
 Html::footer();

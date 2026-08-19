@@ -60,10 +60,9 @@ ORDER BY date_mod DESC
 
 ```text
 ajax/       endpoint de execução
-css/        estilos do laboratório
 front/      página do plugin
 install/    rotinas de instalação
-js/         interação e tabela de resultados
+public/     estilos e JavaScript públicos exigidos pelo GLPI 11
 src/        classes do domínio
 hook.php    hooks de instalação e remoção
 setup.php   metadados e inicialização do plugin
