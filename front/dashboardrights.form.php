@@ -13,6 +13,7 @@ DashboardAccess::checkEdit($dashboardId);
 $dashboard = Dashboard::find($dashboardId);
 if ($dashboard === null) { http_response_code(404); exit; }
 $error = null;
+$redirectUrl = null;
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
         if (isset($_POST['remove'])) {
@@ -20,11 +21,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         } elseif (isset($_POST['save'])) {
             DashboardAccess::save($dashboardId, $_POST);
         }
-        Html::redirect($pluginUrl . '/front/dashboardrights.form.php?dashboards_id=' . $dashboardId . '&saved=1');
+        $redirectUrl = $pluginUrl . '/front/dashboardrights.form.php?dashboards_id=' . $dashboardId . '&saved=1';
     } catch (InvalidArgumentException $exception) {
         $error = $exception->getMessage();
     } catch (Throwable) {
         $error = __('Não foi possível concluir a operação.', 'biforglpi');
+    }
+    if ($redirectUrl !== null) {
+        Html::redirect($redirectUrl);
     }
 }
 

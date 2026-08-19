@@ -37,6 +37,16 @@ assertSameValue(
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
 assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
+
+foreach (['dashboard.form.php', 'widget.form.php', 'dashboardrights.form.php'] as $formFile) {
+    $formSource = file_get_contents(__DIR__ . '/../front/' . $formFile);
+    assertSameValue(
+        'Redirecionamento fora do tratamento de erro em ' . $formFile,
+        true,
+        is_string($formSource)
+            && strrpos($formSource, 'Html::redirect') > strrpos($formSource, 'catch (Throwable')
+    );
+}
 require_once __DIR__ . '/asset_hooks.php';
 
 $savedQuery = SavedQuery::validate([

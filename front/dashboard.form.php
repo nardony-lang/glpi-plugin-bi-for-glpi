@@ -19,13 +19,14 @@ if ($id > 0) {
     Session::checkRight(BiforglpiProfile::RIGHT_MANAGE_DASHBOARDS, UPDATE);
 }
 $error = null;
+$redirectUrl = null;
 $dashboard = ['id' => 0, 'name' => '', 'description' => '', 'is_active' => 1, 'is_demo' => 0];
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
         if (isset($_POST['delete']) && $id > 0) {
             Dashboard::delete($id);
-            Html::redirect($pluginUrl . '/front/dashboards.php?deleted=1');
+            $redirectUrl = $pluginUrl . '/front/dashboards.php?deleted=1';
         }
         if (isset($_POST['save'])) {
             if ($id > 0) {
@@ -33,7 +34,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             } else {
                 $id = Dashboard::create($_POST);
             }
-            Html::redirect($pluginUrl . '/front/dashboard.form.php?id=' . $id . '&saved=1');
+            $redirectUrl = $pluginUrl . '/front/dashboard.form.php?id=' . $id . '&saved=1';
         }
     } catch (InvalidArgumentException $exception) {
         $error = $exception->getMessage();
@@ -41,6 +42,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     } catch (Throwable) {
         $error = __('Não foi possível concluir a operação. Consulte os logs do GLPI.', 'biforglpi');
         $dashboard = array_merge($dashboard, $_POST, ['id' => $id]);
+    }
+    if ($redirectUrl !== null) {
+        Html::redirect($redirectUrl);
     }
 } elseif ($id > 0) {
     $dashboard = Dashboard::find($id) ?? $dashboard;

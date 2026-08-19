@@ -20,6 +20,7 @@ if ($id > 0) {
 }
 DashboardAccess::checkEdit($dashboardId);
 $error = null;
+$redirectUrl = null;
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     try {
         if (isset($_POST['delete']) && $id > 0) {
@@ -27,13 +28,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         } elseif (isset($_POST['save'])) {
             $id > 0 ? DashboardWidget::update($id, $_POST) : DashboardWidget::create($dashboardId, $_POST);
         }
-        Html::redirect($pluginUrl . '/front/dashboard.form.php?id=' . $dashboardId);
+        $redirectUrl = $pluginUrl . '/front/dashboard.form.php?id=' . $dashboardId;
     } catch (InvalidArgumentException $exception) {
         $error = $exception->getMessage();
         $widget = array_merge($widget, $_POST);
     } catch (Throwable) {
         $error = __('Não foi possível concluir a operação.', 'biforglpi');
         $widget = array_merge($widget, $_POST);
+    }
+    if ($redirectUrl !== null) {
+        Html::redirect($redirectUrl);
     }
 }
 $queries = SavedQuery::all(true);
