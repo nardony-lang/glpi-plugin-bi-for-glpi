@@ -33,6 +33,43 @@
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 }
 
+.biforglpi-dashboard-list {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+.biforglpi-widget-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.biforglpi-widget {
+    grid-column: span var(--biforglpi-width, 4);
+    min-width: 0;
+}
+
+.biforglpi-chart {
+    min-height: 280px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.biforglpi-chart canvas {
+    display: block;
+    max-width: 100%;
+}
+
+.biforglpi-no-data {
+    align-items: center;
+    color: var(--tblr-secondary);
+    display: flex;
+    justify-content: center;
+    min-height: 10rem;
+    text-align: center;
+}
+
 .biforglpi-indicator-title {
     font-size: 0.875rem;
     font-weight: 600;
@@ -124,5 +161,19 @@
     .biforglpi-actions > div,
     .biforglpi-actions .btn {
         width: 100%;
+    }
+
+    .biforglpi-widget {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+    .biforglpi-widget {
+        grid-column: span 6;
+    }
+
+    .biforglpi-widget[style*="12"] {
+        grid-column: 1 / -1;
     }
 }

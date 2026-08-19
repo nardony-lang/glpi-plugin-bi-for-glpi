@@ -10,6 +10,7 @@ use Session;
 final class Profile extends \Profile
 {
     public const RIGHT_VIEW_DASHBOARD = 'plugin_biforglpi_dashboard';
+    public const RIGHT_MANAGE_DASHBOARDS = 'plugin_biforglpi_dashboard_manage';
     public const RIGHT_MANAGE_QUERIES = 'plugin_biforglpi_queries';
 
     public static $rightname = 'profile';
@@ -48,6 +49,11 @@ final class Profile extends \Profile
                 'rights' => [READ => __('Visualizar dashboards', 'biforglpi')],
                 'label'  => __('Dashboards', 'biforglpi'),
                 'field'  => self::RIGHT_VIEW_DASHBOARD,
+            ],
+            [
+                'rights' => [UPDATE => __('Criar e administrar dashboards', 'biforglpi')],
+                'label'  => __('Administração de dashboards', 'biforglpi'),
+                'field'  => self::RIGHT_MANAGE_DASHBOARDS,
             ],
             [
                 'rights' => [

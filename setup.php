@@ -10,7 +10,7 @@ use Glpi\Plugin\Hooks;
 use GlpiPlugin\Biforglpi\Profile as BiforglpiProfile;
 use GlpiPlugin\Biforglpi\SqlLab;
 
-define('PLUGIN_BIFORGLPI_VERSION', '0.2.0');
+define('PLUGIN_BIFORGLPI_VERSION', '0.3.0');
 define('PLUGIN_BIFORGLPI_MIN_GLPI_VERSION', '11.0.0');
 define('PLUGIN_BIFORGLPI_MAX_GLPI_VERSION', '12.0.0');
 
@@ -19,7 +19,7 @@ function plugin_init_biforglpi(): void
     global $PLUGIN_HOOKS;
 
     $PLUGIN_HOOKS[Hooks::MENU_TOADD]['biforglpi'] = [
-        'plugins' => SqlLab::class,
+        'tools' => SqlLab::class,
     ];
 
     $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
@@ -28,6 +28,9 @@ function plugin_init_biforglpi(): void
     }
     if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/sqllab.php')) {
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/sqllab.js';
+    }
+    if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/dashboard.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/dashboard.js';
     }
 
     Plugin::registerClass(BiforglpiProfile::class, [
@@ -41,7 +44,7 @@ function plugin_version_biforglpi(): array
     return [
         'name'         => 'BI for GLPI',
         'version'      => PLUGIN_BIFORGLPI_VERSION,
-        'author'       => 'BI for GLPI contributors',
+        'author'       => 'Douglas Nardoni',
         'license'      => 'GPL-3.0-or-later',
         'homepage'     => 'https://github.com/nardony-lang/glpi-plugin-bi-for-glpi',
         'requirements' => [

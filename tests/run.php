@@ -3,11 +3,16 @@
 use GlpiPlugin\Biforglpi\SqlQueryTimeout;
 use GlpiPlugin\Biforglpi\SqlReadOnlyGuard;
 use GlpiPlugin\Biforglpi\SavedQuery;
+use GlpiPlugin\Biforglpi\Dashboard;
+use GlpiPlugin\Biforglpi\DashboardWidget;
 
 require_once __DIR__ . '/../src/SqlQueryTimeout.php';
 require_once __DIR__ . '/../src/SqlReadOnlyGuard.php';
 require_once __DIR__ . '/../src/SqlExecutor.php';
 require_once __DIR__ . '/../src/SavedQuery.php';
+require_once __DIR__ . '/../src/Dashboard.php';
+require_once __DIR__ . '/../src/DashboardAccess.php';
+require_once __DIR__ . '/../src/DashboardWidget.php';
 
 function assertSameValue(string $label, mixed $expected, mixed $actual): void
 {
@@ -31,6 +36,32 @@ assertSameValue(
     true,
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
+assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
+assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
+$logoInfo = getimagesize(__DIR__ . '/../logo.png');
+assertSameValue(
+    'Logo PNG quadrado e otimizado',
+    [256, 256, 'image/png'],
+    is_array($logoInfo) ? [$logoInfo[0], $logoInfo[1], $logoInfo['mime']] : null
+);
+
+foreach (['dashboard.form.php', 'widget.form.php', 'dashboardrights.form.php'] as $formFile) {
+    $formSource = file_get_contents(__DIR__ . '/../front/' . $formFile);
+    assertSameValue(
+        'Redirecionamento fora do tratamento de erro em ' . $formFile,
+        true,
+        is_string($formSource)
+            && strrpos($formSource, 'Html::redirect') > strrpos($formSource, 'catch (Throwable')
+    );
+}
+
+$rightsFormSource = file_get_contents(__DIR__ . '/../front/dashboardrights.form.php');
+assertSameValue(
+    'Banco importado no escopo da página de permissões do GLPI 11',
+    true,
+    is_string($rightsFormSource)
+        && strpos($rightsFormSource, 'global $DB;') < strpos($rightsFormSource, '$DB->request')
+);
 require_once __DIR__ . '/asset_hooks.php';
 
 $savedQuery = SavedQuery::validate([
@@ -44,6 +75,37 @@ $savedQuery = SavedQuery::validate([
 assertSameValue('Nome da consulta salva', 'Chamados em atendimento', $savedQuery['name']);
 assertSameValue('Tipo de indicador salvo', SavedQuery::TYPE_NUMBER, $savedQuery['visualization']);
 assertSameValue('Consulta salva ativa', 1, $savedQuery['is_active']);
+
+$dashboard = Dashboard::validate([
+    'name' => 'Gestão de Requisições',
+    'description' => 'Indicadores mensais',
+    'is_active' => 1,
+    'is_demo' => 1,
+]);
+assertSameValue('Dashboard em demonstração', 1, $dashboard['is_demo']);
+
+$widget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'title' => 'Requisições por grupo',
+    'widget_type' => 'bar',
+    'position' => 2,
+    'width' => 6,
+    'demo_data' => '[{"grupo":"Service Desk","total":15}]',
+]);
+assertSameValue('Componente gráfico', 'bar', $widget['widget_type']);
+assertSameValue('Largura do componente', 6, $widget['width']);
+
+try {
+    DashboardWidget::validate([
+        'savedqueries_id' => 1,
+        'widget_type' => 'bar',
+        'width' => 5,
+        'demo_data' => 'inválido',
+    ]);
+    throw new RuntimeException('Dados de demonstração inválidos foram aceitos.');
+} catch (InvalidArgumentException) {
+    // Expected.
+}
 
 try {
     SavedQuery::validate([

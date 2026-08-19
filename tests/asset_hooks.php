@@ -12,6 +12,8 @@ namespace Glpi\Plugin {
 namespace GlpiPlugin\Biforglpi {
     final class Profile
     {
+        public const RIGHT_VIEW_DASHBOARD = 'plugin_biforglpi_dashboard';
+        public const RIGHT_MANAGE_DASHBOARDS = 'plugin_biforglpi_dashboard_manage';
         public static function installRights(): bool
         {
             return true;
@@ -62,6 +64,7 @@ namespace {
     {
         /** @var list<string> */
         public array $queries = [];
+        private int $lastId = 0;
 
         public function tableExists(string $table): bool
         {
@@ -72,6 +75,22 @@ namespace {
         {
             $this->queries[] = $query;
             return true;
+        }
+
+        public function insert(string $table, array $data): bool
+        {
+            $this->lastId++;
+            return true;
+        }
+
+        public function insertId(): int
+        {
+            return $this->lastId;
+        }
+
+        public function request(array $criteria): array
+        {
+            return [];
         }
     }
 
@@ -91,6 +110,25 @@ namespace {
         ['js/sqllab.js'],
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
+    assertSameValue(
+        'BI for GLPI no menu Ferramentas',
+        ['tools' => \GlpiPlugin\Biforglpi\SqlLab::class],
+        $PLUGIN_HOOKS['menu_toadd']['biforglpi'] ?? null
+    );
+    assertSameValue(
+        'Autor do plugin',
+        'Douglas Nardoni',
+        plugin_version_biforglpi()['author'] ?? null
+    );
+
+    $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/dashboard.php';
+    $PLUGIN_HOOKS = [];
+    plugin_init_biforglpi();
+    assertSameValue(
+        'JavaScript do dashboard no GLPI 11',
+        ['js/dashboard.js'],
+        $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
+    );
 
     $DB = new BiforglpiTestDb();
     require_once __DIR__ . '/../install/install.php';
@@ -98,11 +136,18 @@ namespace {
     assertSameValue(
         'Tabela de consultas salvas no esquema',
         true,
-        str_contains($DB->queries[0] ?? '', 'glpi_plugin_biforglpi_savedqueries')
+        count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, 'glpi_plugin_biforglpi_savedqueries'))) > 0
     );
     assertSameValue(
         'SQL armazenado como LONGTEXT',
         true,
-        str_contains($DB->queries[0] ?? '', '`query_sql` LONGTEXT NOT NULL')
+        count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`query_sql` LONGTEXT NOT NULL'))) > 0
     );
+    foreach (['glpi_plugin_biforglpi_dashboards', 'glpi_plugin_biforglpi_dashboardwidgets', 'glpi_plugin_biforglpi_dashboardrights'] as $table) {
+        assertSameValue(
+            'Tabela criada: ' . $table,
+            true,
+            count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, $table))) > 0
+        );
+    }
 }

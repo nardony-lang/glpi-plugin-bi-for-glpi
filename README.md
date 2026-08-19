@@ -1,7 +1,7 @@
 # BI for GLPI
 
 Plugin de Business Intelligence para GLPI 11. Inclui um **Laboratório SQL** seguro,
-consultas salvas, indicadores numéricos e um dashboard inicial.
+consultas salvas, múltiplos dashboards, gráficos e controle de acesso.
 
 ## Compatibilidade
 
@@ -19,7 +19,8 @@ git clone https://github.com/nardony-lang/glpi-plugin-bi-for-glpi.git biforglpi
 ```
 
 Depois, no GLPI, acesse **Configuração > Plugins**, instale e ative **BI for GLPI**.
-O Laboratório SQL ficará disponível no menu **Plugins** somente para perfis com o
+O BI for GLPI ficará disponível no menu **Ferramentas** somente para perfis com
+algum direito do módulo. O Laboratório SQL será exibido apenas para perfis com o
 direito específico **Executar consultas SQL**. Na instalação, esse direito é concedido
 apenas ao perfil que instalou o plugin, normalmente o **Super-Admin**. Ele pode ser
 administrado posteriormente em **Administração > Perfis > BI for GLPI**.
@@ -43,7 +44,7 @@ Proteções incluídas:
 - medição do tempo de execução e indicação de resultado truncado;
 - renderização de células com `textContent`, sem interpretar HTML retornado pelo banco.
 
-## Consultas salvas e dashboard
+## Consultas salvas e dashboards
 
 Perfis autorizados podem salvar consultas como:
 
@@ -59,15 +60,31 @@ WHERE status IN (2, 3)
   AND is_deleted = 0
 ```
 
-O dashboard executa até 12 indicadores ativos, mantendo o limite de tempo e as
-proteções de somente leitura. Consultas salvas devem aplicar os filtros de entidade
-necessários para o público autorizado a visualizar o dashboard.
+Cada dashboard armazena seus próprios componentes e pode combinar:
+
+- indicadores numéricos;
+- tabelas;
+- gráficos de barras, linha e rosca;
+- dados reais das consultas ou dados JSON de demonstração.
+
+O modo demonstração permite desenhar e homologar painéis mesmo sem chamados ou
+SLAs cadastrados. Ao desativá-lo, os componentes executam suas consultas mantendo
+o limite de linhas, o timeout e as proteções de somente leitura.
+
+Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
+automaticamente as consultas ativas existentes.
 
 Permissões disponíveis em **Administração > Perfis > BI for GLPI**:
 
 - visualizar dashboards;
+- criar e administrar dashboards;
 - visualizar ou gerenciar consultas salvas;
 - executar consultas no Laboratório SQL.
+
+Além dos direitos gerais do perfil, cada dashboard possui uma lista própria de
+acesso. É possível conceder a um **perfil** ou **grupo** o nível “somente visualizar”
+ou “visualizar e editar”. Administradores de dashboards podem acessar todos os
+painéis para configuração.
 
 > A validação do plugin é uma camada de defesa da aplicação. Em produção, aplique
 > também o princípio do menor privilégio no banco e, para análises pesadas, prefira
@@ -109,8 +126,12 @@ php tests/run.php
 ```
 
 O roteiro de homologação da versão em desenvolvimento está em
-[`docs/TESTING-0.2.0.md`](docs/TESTING-0.2.0.md).
+[`docs/TESTING-0.3.0.md`](docs/TESTING-0.3.0.md).
 
 ## Licença
 
 GPL-3.0-or-later. Consulte [LICENSE](LICENSE).
+
+## Autoria
+
+Desenvolvido por **Douglas Nardoni**.
