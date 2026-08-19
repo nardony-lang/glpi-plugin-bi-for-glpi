@@ -5,14 +5,20 @@ use GlpiPlugin\Biforglpi\SqlReadOnlyGuard;
 use GlpiPlugin\Biforglpi\SavedQuery;
 use GlpiPlugin\Biforglpi\Dashboard;
 use GlpiPlugin\Biforglpi\DashboardWidget;
+use GlpiPlugin\Biforglpi\DashboardFilter;
+use GlpiPlugin\Biforglpi\IndicatorCatalog;
+use GlpiPlugin\Biforglpi\SqlTemplate;
 
 require_once __DIR__ . '/../src/SqlQueryTimeout.php';
 require_once __DIR__ . '/../src/SqlReadOnlyGuard.php';
+require_once __DIR__ . '/../src/SqlTemplate.php';
 require_once __DIR__ . '/../src/SqlExecutor.php';
 require_once __DIR__ . '/../src/SavedQuery.php';
 require_once __DIR__ . '/../src/Dashboard.php';
 require_once __DIR__ . '/../src/DashboardAccess.php';
 require_once __DIR__ . '/../src/DashboardWidget.php';
+require_once __DIR__ . '/../src/DashboardFilter.php';
+require_once __DIR__ . '/../src/IndicatorCatalog.php';
 
 function assertSameValue(string $label, mixed $expected, mixed $actual): void
 {
@@ -76,13 +82,54 @@ assertSameValue('Nome da consulta salva', 'Chamados em atendimento', $savedQuery
 assertSameValue('Tipo de indicador salvo', SavedQuery::TYPE_NUMBER, $savedQuery['visualization']);
 assertSameValue('Consulta salva ativa', 1, $savedQuery['is_active']);
 
+$template = new SqlTemplate();
+$templatedSql = 'SELECT * FROM glpi_tickets WHERE entities_id = {{entity_id}} AND solvedate >= {{date_start}} AND solvedate < {{date_end_exclusive}}';
+assertSameValue('Variáveis preservadas ao salvar', $templatedSql, $template->validate($templatedSql));
+assertSameValue(
+    'Variáveis compiladas com tipos seguros',
+    "SELECT * FROM glpi_tickets WHERE entities_id = 2 AND solvedate >= '2026-08-01 00:00:00' AND solvedate < '2026-09-01 00:00:00'",
+    $template->compile($templatedSql, ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31'])
+);
+foreach ([
+    'SELECT {{unknown_token}}',
+    'SELECT * FROM glpi_tickets WHERE date >= {{date_start',
+] as $invalidTemplate) {
+    try {
+        $template->validate($invalidTemplate);
+        throw new RuntimeException('Variável SQL inválida foi aceita.');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
+
+$_SESSION['glpiactive_entity'] = 2;
+$_SESSION['glpiactiveentities'] = [2, 3];
+$filterContext = DashboardFilter::context(['entity_id' => '3', 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']);
+assertSameValue('Filtro aceita entidade autorizada', 3, $filterContext['entity_id']);
+$fallbackContext = DashboardFilter::context(['entity_id' => '999']);
+assertSameValue('Filtro rejeita entidade não autorizada', 2, $fallbackContext['entity_id']);
+
+$catalog = IndicatorCatalog::all();
+assertSameValue('Catálogo inicial com cinco indicadores', 5, count($catalog));
+foreach ($catalog as $catalogItem) {
+    assertSameValue(
+        'Consulta do catálogo preserva modelo seguro',
+        $catalogItem['query_sql'],
+        $template->validate((string) $catalogItem['query_sql'])
+    );
+}
+
 $dashboard = Dashboard::validate([
     'name' => 'Gestão de Requisições',
     'description' => 'Indicadores mensais',
     'is_active' => 1,
     'is_demo' => 1,
+    'use_entity_filter' => 1,
+    'use_period_filter' => 1,
 ]);
 assertSameValue('Dashboard em demonstração', 1, $dashboard['is_demo']);
+assertSameValue('Dashboard com filtro de entidade', 1, $dashboard['use_entity_filter']);
+assertSameValue('Dashboard com filtro de período', 1, $dashboard['use_period_filter']);
 
 $widget = DashboardWidget::validate([
     'savedqueries_id' => 1,

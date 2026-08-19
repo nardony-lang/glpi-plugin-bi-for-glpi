@@ -39,7 +39,7 @@ foreach ($DB->request(['FROM' => 'glpi_profiles', 'ORDER' => ['name ASC']]) as $
 $groups = [];
 foreach ($DB->request(['FROM' => 'glpi_groups', 'ORDER' => ['completename ASC']]) as $row) { $groups[(int) $row['id']] = (string) ($row['completename'] ?: $row['name']); }
 $rights = DashboardAccess::allForDashboard($dashboardId);
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl"><?php Navigation::render('dashboards'); ?><div class="biforglpi-page-heading"><div><h1><?= __('Acesso ao dashboard', 'biforglpi') ?></h1><p class="text-secondary mb-0"><?= htmlspecialchars((string) $dashboard['name'], ENT_QUOTES, 'UTF-8') ?></p></div><a class="btn btn-outline-secondary" href="<?= $escapedPluginUrl ?>/front/dashboard.form.php?id=<?= $dashboardId ?>"><?= __('Voltar à configuração', 'biforglpi') ?></a></div>
 <?php if (isset($_GET['saved'])): ?><div class="alert alert-success"><?= __('Permissões atualizadas.', 'biforglpi') ?></div><?php endif; ?><?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>

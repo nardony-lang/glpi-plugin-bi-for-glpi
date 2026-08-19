@@ -1,6 +1,7 @@
 <?php
 
 use GlpiPlugin\Biforglpi\Navigation;
+use GlpiPlugin\Biforglpi\DashboardFilter;
 use GlpiPlugin\Biforglpi\Profile;
 use GlpiPlugin\Biforglpi\SavedQuery;
 use GlpiPlugin\Biforglpi\SqlExecutor;
@@ -15,6 +16,8 @@ $escapedPluginUrl = htmlspecialchars($pluginUrl, ENT_QUOTES, 'UTF-8');
 $initialSql = "SELECT id, name, date_mod\nFROM glpi_computers\nORDER BY date_mod DESC";
 $initialLimit = SqlExecutor::DEFAULT_LIMIT;
 $initialQueryName = null;
+$filterContext = DashboardFilter::context($_GET);
+$filterEntities = DashboardFilter::entities();
 
 $savedQueryId = filter_input(INPUT_GET, 'saved_query_id', FILTER_VALIDATE_INT);
 if ($savedQueryId && Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ)) {
@@ -26,7 +29,7 @@ if ($savedQueryId && Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ)) {
     }
 }
 
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl" data-endpoint="<?= $escapedPluginUrl ?>/ajax/execute.php">
     <?php Navigation::render('lab'); ?>
@@ -70,6 +73,25 @@ Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', Sq
                     spellcheck="false"
                     required
                 ><?= htmlspecialchars($initialSql, ENT_QUOTES, 'UTF-8') ?></textarea>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-lg-4">
+                        <label class="form-label" for="biforglpi-entity"><?= __('Entidade usada nas variáveis', 'biforglpi') ?></label>
+                        <select class="form-select" id="biforglpi-entity" name="entity_id">
+                            <?php foreach ($filterEntities as $entityId => $entityName): ?>
+                                <option value="<?= $entityId ?>" <?= $entityId === $filterContext['entity_id'] ? 'selected' : '' ?>><?= htmlspecialchars($entityName, ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label" for="biforglpi-date-start"><?= __('Data inicial', 'biforglpi') ?></label>
+                        <input class="form-control" id="biforglpi-date-start" name="date_start" type="date" value="<?= htmlspecialchars($filterContext['date_start'], ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label" for="biforglpi-date-end"><?= __('Data final', 'biforglpi') ?></label>
+                        <input class="form-control" id="biforglpi-date-end" name="date_end" type="date" value="<?= htmlspecialchars($filterContext['date_end'], ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                </div>
 
                 <div class="biforglpi-actions mt-3">
                     <div>

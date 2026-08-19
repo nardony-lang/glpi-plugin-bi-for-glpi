@@ -89,7 +89,7 @@ final class Dashboard
         }
     }
 
-    /** @param array<string, mixed> $input @return array{name:string,description:?string,is_active:int,is_demo:int} */
+    /** @param array<string, mixed> $input @return array{name:string,description:?string,is_active:int,is_demo:int,use_entity_filter:int,use_period_filter:int} */
     public static function validate(array $input): array
     {
         $name = trim((string) ($input['name'] ?? ''));
@@ -105,13 +105,15 @@ final class Dashboard
             'description' => $description !== '' ? $description : null,
             'is_active' => !empty($input['is_active']) ? 1 : 0,
             'is_demo' => !empty($input['is_demo']) ? 1 : 0,
+            'use_entity_filter' => !empty($input['use_entity_filter']) ? 1 : 0,
+            'use_period_filter' => !empty($input['use_period_filter']) ? 1 : 0,
         ];
     }
 
     /** @param array<string, mixed> $row @return array<string, mixed> */
     private static function castRow(array $row): array
     {
-        foreach (['id', 'is_active', 'is_demo', 'users_id'] as $field) {
+        foreach (['id', 'is_active', 'is_demo', 'use_entity_filter', 'use_period_filter', 'users_id'] as $field) {
             $row[$field] = (int) $row[$field];
         }
         return $row;

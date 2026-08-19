@@ -18,6 +18,9 @@ final class Navigation
         if (Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, READ)) {
             $links['queries'] = ['Consultas salvas', $baseUrl . '/front/queries.php', 'ti-database'];
         }
+        if (Session::haveRight(Profile::RIGHT_MANAGE_QUERIES, UPDATE)) {
+            $links['catalog'] = ['Catálogo', $baseUrl . '/front/catalog.php', 'ti-template'];
+        }
         if (Session::haveRight(SqlLab::RIGHT_NAME, READ)) {
             $links['lab'] = ['Laboratório SQL', $baseUrl . '/front/sqllab.php', 'ti-code'];
         }

@@ -42,7 +42,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 $queries = SavedQuery::all(true);
 $labels = ['number' => 'Indicador numérico', 'table' => 'Tabela', 'bar' => 'Gráfico de barras', 'line' => 'Gráfico de linha', 'doughnut' => 'Gráfico de rosca'];
-Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'plugins', SqlLab::class);
+Html::header(__('BI for GLPI', 'biforglpi'), $_SERVER['PHP_SELF'], 'tools', SqlLab::class);
 ?>
 <main class="biforglpi-lab container-xl"><?php Navigation::render('dashboards'); ?><div class="biforglpi-page-heading"><div><h1><?= $id ? __('Editar componente', 'biforglpi') : __('Novo componente', 'biforglpi') ?></h1><p class="text-secondary mb-0"><?= __('Associe uma consulta a uma visualização do dashboard.', 'biforglpi') ?></p></div></div>
 <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>

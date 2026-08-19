@@ -7,7 +7,7 @@ use Throwable;
 final class WidgetRenderer
 {
     /** @param array<string, mixed> $widget @param array<string, mixed> $query @return array<string, mixed> */
-    public function prepare(array $widget, array $query, bool $demo): array
+    public function prepare(array $widget, array $query, bool $demo, array $filterContext): array
     {
         try {
             if ($demo) {
@@ -15,8 +15,9 @@ final class WidgetRenderer
                 $columns = $rows === [] ? [] : array_map('strval', array_keys($rows[0]));
                 $elapsedMs = null;
             } else {
+                $sql = (new SqlTemplate())->compile((string) $query['query_sql'], $filterContext);
                 $result = (new SqlExecutor())->execute(
-                    (string) $query['query_sql'],
+                    $sql,
                     (int) $query['row_limit']
                 );
                 $rows = $result['rows'];
@@ -60,7 +61,7 @@ final class WidgetRenderer
     /** @param list<array<string, mixed>> $rows */
     private function numberValue(array $rows): string
     {
-        if ($rows === [] || $rows[0] === []) {
+        if ($rows === [] || $rows[0] === [] || reset($rows[0]) === null) {
             return __('Sem dados', 'biforglpi');
         }
         $value = reset($rows[0]);

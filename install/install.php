@@ -32,10 +32,18 @@ function plugin_biforglpi_run_install(): bool
         $DB->doQuery("CREATE TABLE `{$table}` (
             `id` INT {$keySign} NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL,
             `description` TEXT DEFAULT NULL, `is_active` TINYINT NOT NULL DEFAULT 1,
-            `is_demo` TINYINT NOT NULL DEFAULT 0, `users_id` INT {$keySign} NOT NULL DEFAULT 0,
+            `is_demo` TINYINT NOT NULL DEFAULT 0, `use_entity_filter` TINYINT NOT NULL DEFAULT 0,
+            `use_period_filter` TINYINT NOT NULL DEFAULT 0, `users_id` INT {$keySign} NOT NULL DEFAULT 0,
             `date_creation` TIMESTAMP NULL DEFAULT NULL, `date_mod` TIMESTAMP NULL DEFAULT NULL,
             PRIMARY KEY (`id`), KEY `is_active` (`is_active`), KEY `users_id` (`users_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET={$charset} COLLATE={$collation} ROW_FORMAT=DYNAMIC");
+    }
+
+    if (!$DB->fieldExists(Dashboard::TABLE, 'use_entity_filter')) {
+        $DB->doQuery('ALTER TABLE `' . Dashboard::TABLE . '` ADD `use_entity_filter` TINYINT NOT NULL DEFAULT 0 AFTER `is_demo`');
+    }
+    if (!$DB->fieldExists(Dashboard::TABLE, 'use_period_filter')) {
+        $DB->doQuery('ALTER TABLE `' . Dashboard::TABLE . '` ADD `use_period_filter` TINYINT NOT NULL DEFAULT 0 AFTER `use_entity_filter`');
     }
 
     if (!$DB->tableExists(DashboardWidget::TABLE)) {
@@ -83,7 +91,7 @@ function plugin_biforglpi_migrate_legacy_dashboard(): void
     $DB->insert(Dashboard::TABLE, [
         'name' => 'Dashboard principal',
         'description' => 'Dashboard criado automaticamente a partir da versão 0.2.0.',
-        'is_active' => 1, 'is_demo' => 0,
+        'is_active' => 1, 'is_demo' => 0, 'use_entity_filter' => 0, 'use_period_filter' => 0,
         'users_id' => (int) ($_SESSION['glpiID'] ?? 0),
         'date_creation' => $now, 'date_mod' => $now,
     ]);
