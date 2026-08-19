@@ -30,7 +30,8 @@ final class IndicatorCatalog
                 'name' => 'Percentual solucionado dentro do ANS',
                 'description' => 'Percentual das requisições com ANS solucionadas dentro do prazo.',
                 'query_sql' => "SELECT CASE WHEN COUNT(*) = 0 THEN NULL ELSE ROUND(100 * SUM(CASE WHEN solvedate <= time_to_resolve THEN 1 ELSE 0 END) / COUNT(*), 2) END AS percentual\nFROM glpi_tickets\nWHERE entities_id = {{entity_id}}\n  AND type = 2\n  AND status IN (5, 6)\n  AND is_deleted = 0\n  AND time_to_resolve IS NOT NULL\n  AND solvedate >= {{date_start}}\n  AND solvedate < {{date_end_exclusive}}",
-                'visualization' => SavedQuery::TYPE_NUMBER, 'widget_type' => 'number', 'row_limit' => 1, 'width' => 4,
+                'visualization' => SavedQuery::TYPE_NUMBER, 'widget_type' => 'gauge', 'row_limit' => 1, 'width' => 4,
+                'widget_settings' => DashboardWidget::defaultGaugeSettings(),
             ],
             'average_by_group' => [
                 'name' => 'Tempo médio por grupo solucionador',

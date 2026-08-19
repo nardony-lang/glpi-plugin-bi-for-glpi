@@ -60,12 +60,54 @@
         data.labels.slice(0, 8).forEach((label, index) => { context.fillStyle = colors[index % colors.length]; context.fillRect(legendX, 34 + index * 27, 12, 12); context.fillStyle = '#182433'; context.textAlign = 'left'; context.fillText(`${String(label).slice(0, 20)}: ${data.values[index]}`, legendX + 20, 44 + index * 27, Math.max(width - legendX - 24, 80)); });
     }
 
+    function drawGauge(context, width, height, data) {
+        const min = Number(data.min), max = Number(data.max), value = Number(data.value);
+        if (![min, max, value].every(Number.isFinite) || max <= min) return;
+        const centerX = width / 2, centerY = height * 0.7, radius = Math.min(105, width * 0.34);
+        const start = Math.PI, range = max - min;
+        const angleFor = (number) => start + Math.max(0, Math.min(1, (number - min) / range)) * Math.PI;
+        const arc = (from, to, color, lineWidth) => {
+            context.beginPath(); context.arc(centerX, centerY, radius, angleFor(from), angleFor(to));
+            context.strokeStyle = color; context.lineWidth = lineWidth; context.lineCap = 'butt'; context.stroke();
+        };
+        arc(min, max, '#e9ecef', 26);
+        arc(min, Number(data.warning), data.color_low, 26);
+        arc(Number(data.warning), Number(data.success), data.color_mid, 26);
+        arc(Number(data.success), max, data.color_high, 26);
+
+        if (data.target !== null && Number.isFinite(Number(data.target))) {
+            const targetAngle = angleFor(Number(data.target));
+            context.beginPath();
+            context.moveTo(centerX + Math.cos(targetAngle) * (radius - 20), centerY + Math.sin(targetAngle) * (radius - 20));
+            context.lineTo(centerX + Math.cos(targetAngle) * (radius + 20), centerY + Math.sin(targetAngle) * (radius + 20));
+            context.strokeStyle = '#182433'; context.lineWidth = 3; context.stroke();
+        }
+
+        const needleAngle = angleFor(value);
+        context.beginPath(); context.moveTo(centerX, centerY);
+        context.lineTo(centerX + Math.cos(needleAngle) * (radius - 18), centerY + Math.sin(needleAngle) * (radius - 18));
+        context.strokeStyle = '#182433'; context.lineWidth = 4; context.lineCap = 'round'; context.stroke();
+        context.beginPath(); context.arc(centerX, centerY, 8, 0, Math.PI * 2); context.fillStyle = '#182433'; context.fill();
+
+        const formatted = new Intl.NumberFormat('pt-BR', {maximumFractionDigits: 2}).format(value);
+        const unit = String(data.unit || '');
+        context.fillStyle = '#182433'; context.font = 'bold 30px sans-serif'; context.textAlign = 'center';
+        context.fillText(`${formatted}${unit === '%' ? '' : ' '}${unit}`, centerX, centerY + 48);
+        context.fillStyle = '#626976'; context.font = '12px sans-serif';
+        context.textAlign = 'left'; context.fillText(String(min), centerX - radius - 12, centerY + 24);
+        context.textAlign = 'right'; context.fillText(String(max), centerX + radius + 12, centerY + 24);
+        if (data.target !== null) {
+            context.textAlign = 'center'; context.fillText(`Meta: ${data.target}${unit}`, centerX, centerY + 70);
+        }
+    }
+
     function render(container) {
         let data;
         try { data = JSON.parse(container.dataset.chart); } catch (error) { return; }
         const canvas = container.querySelector('canvas');
         const {context, width, height} = setupCanvas(canvas);
-        if (container.dataset.chartType === 'doughnut') drawDoughnut(context, width, height, data);
+        if (container.dataset.chartType === 'gauge') drawGauge(context, width, height, data);
+        else if (container.dataset.chartType === 'doughnut') drawDoughnut(context, width, height, data);
         else if (container.dataset.chartType === 'line') drawLine(context, width, height, data);
         else drawBar(context, width, height, data);
     }

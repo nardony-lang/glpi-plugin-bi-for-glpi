@@ -32,6 +32,7 @@ final class WidgetRenderer
                 'rows' => $rows,
                 'elapsed_ms' => $elapsedMs,
                 'chart' => $this->chartData($rows),
+                'gauge' => $this->gaugeData($rows, $widget),
                 'value' => $this->numberValue($rows),
             ];
         } catch (Throwable) {
@@ -74,6 +75,23 @@ final class WidgetRenderer
             : number_format($number, 2, ',', '.');
     }
 
+    /** @param list<array<string, mixed>> $rows @param array<string, mixed> $widget @return array<string, mixed>|null */
+    private function gaugeData(array $rows, array $widget): ?array
+    {
+        if ($rows === [] || $rows[0] === []) {
+            return null;
+        }
+        $value = reset($rows[0]);
+        if (!is_numeric($value)) {
+            return null;
+        }
+        $settings = array_merge(
+            DashboardWidget::defaultGaugeSettings(),
+            is_array($widget['settings'] ?? null) ? $widget['settings'] : []
+        );
+        return ['value' => (float) $value] + $settings;
+    }
+
     /** @param array<string, mixed> $widget @return list<array<string, mixed>> */
     private function demoRows(array $widget): array
     {
@@ -82,6 +100,9 @@ final class WidgetRenderer
             if (is_array($decoded)) {
                 return array_values(array_filter($decoded, 'is_array'));
             }
+        }
+        if ($widget['widget_type'] === 'gauge') {
+            return [['valor' => 92]];
         }
         if ($widget['widget_type'] === 'number') {
             return [['valor' => 128]];

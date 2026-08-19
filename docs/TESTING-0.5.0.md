@@ -1,0 +1,30 @@
+# Homologação da versão 0.5.0
+
+## Atualização inicial
+
+1. Atualize a branch de homologação no diretório `plugins/biforglpi`.
+2. Execute a atualização em **Configuração > Plugins**.
+3. Confirme a versão `0.5.0-rc1` e a preservação dos dashboards existentes.
+
+## Gauge
+
+1. Edite um dashboard e adicione um componente.
+2. Selecione **Gauge (velocímetro)** e uma consulta que retorne um valor numérico.
+3. Configure mínimo `0`, máximo `100`, meta `95`, atenção `80`, sucesso `95` e unidade `%`.
+4. Salve e confirme as três faixas, o ponteiro, o valor central e a marca de meta.
+5. Altere cores, limites e unidade e confirme a atualização.
+6. Informe faixas fora de ordem e confirme que o salvamento é bloqueado com uma mensagem clara.
+
+## Catálogo e demonstração
+
+1. Adicione **Percentual solucionado dentro do ANS** pelo Catálogo.
+2. Confirme que o componente criado usa Gauge.
+3. Em um dashboard de demonstração, confirme o valor de exemplo e a renderização responsiva.
+4. Em dados reais sem SLA, confirme o estado **Sem valor numérico para gerar o Gauge**.
+
+## Regressão
+
+1. Confirme indicadores numéricos, tabelas, barras, linhas e roscas.
+2. Teste filtros de entidade e período.
+3. Teste acesso somente leitura por perfil e grupo.
+4. Abra e execute consultas parametrizadas no Laboratório SQL.

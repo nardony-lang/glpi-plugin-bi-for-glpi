@@ -65,6 +65,7 @@ Cada dashboard armazena seus próprios componentes e pode combinar:
 - indicadores numéricos;
 - tabelas;
 - gráficos de barras, linha e rosca;
+- Gauge (velocímetro) com mínimo, máximo, meta, unidade e faixas de cores;
 - dados reais das consultas ou dados JSON de demonstração.
 
 O modo demonstração permite desenhar e homologar painéis mesmo sem chamados ou
@@ -84,6 +85,9 @@ O **Catálogo de indicadores** cria consultas e componentes prontos no dashboard
 O catálogo inicial inclui total e tempo médio de requisições solucionadas,
 resultados por grupo solucionador e percentual dentro do ANS. As consultas criadas
 continuam editáveis e podem ser abertas no Laboratório SQL.
+
+O Gauge utiliza o primeiro valor numérico retornado pela consulta. Sua configuração
+permite definir faixas crítica, de atenção e de sucesso, além de uma marca de meta.
 
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
@@ -140,7 +144,7 @@ php tests/run.php
 ```
 
 O roteiro de homologação da versão em desenvolvimento está em
-[`docs/TESTING-0.4.0.md`](docs/TESTING-0.4.0.md).
+[`docs/TESTING-0.5.0.md`](docs/TESTING-0.5.0.md).
 
 ## Licença
 

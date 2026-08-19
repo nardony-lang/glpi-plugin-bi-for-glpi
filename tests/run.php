@@ -43,6 +43,7 @@ assertSameValue(
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
 assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
+assertSameValue('JavaScript de configuração do Gauge', true, is_file(__DIR__ . '/../public/js/widget.js'));
 assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
 $logoInfo = getimagesize(__DIR__ . '/../logo.png');
 assertSameValue(
@@ -141,6 +142,41 @@ $widget = DashboardWidget::validate([
 ]);
 assertSameValue('Componente gráfico', 'bar', $widget['widget_type']);
 assertSameValue('Largura do componente', 6, $widget['width']);
+
+$gaugeWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'gauge',
+    'width' => 4,
+    'gauge_min' => 0,
+    'gauge_max' => 100,
+    'gauge_target' => 95,
+    'gauge_warning' => 80,
+    'gauge_success' => 95,
+    'gauge_unit' => '%',
+    'gauge_color_low' => '#d63939',
+    'gauge_color_mid' => '#f59f00',
+    'gauge_color_high' => '#2fb344',
+]);
+$gaugeSettings = json_decode((string) $gaugeWidget['settings_json'], true);
+assertSameValue('Componente Gauge', 'gauge', $gaugeWidget['widget_type']);
+assertSameValue('Meta do Gauge', 95.0, isset($gaugeSettings['target']) ? (float) $gaugeSettings['target'] : null);
+assertSameValue('Unidade do Gauge', '%', $gaugeSettings['unit'] ?? null);
+
+try {
+    DashboardWidget::validate([
+        'savedqueries_id' => 1,
+        'widget_type' => 'gauge',
+        'gauge_min' => 100,
+        'gauge_max' => 0,
+        'gauge_warning' => 80,
+        'gauge_success' => 95,
+    ]);
+    throw new RuntimeException('Gauge com intervalo inválido foi aceito.');
+} catch (InvalidArgumentException) {
+    // Expected.
+}
+
+assertSameValue('Indicador de ANS usa Gauge', 'gauge', $catalog['within_sla']['widget_type'] ?? null);
 
 try {
     DashboardWidget::validate([

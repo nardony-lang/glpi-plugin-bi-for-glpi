@@ -135,6 +135,15 @@ namespace {
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
 
+    $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/widget.form.php';
+    $PLUGIN_HOOKS = [];
+    plugin_init_biforglpi();
+    assertSameValue(
+        'JavaScript do editor de Gauge no GLPI 11',
+        ['js/widget.js'],
+        $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
+    );
+
     $DB = new BiforglpiTestDb();
     require_once __DIR__ . '/../install/install.php';
     assertSameValue('Instalação da tabela de consultas', true, plugin_biforglpi_run_install());
@@ -162,4 +171,9 @@ namespace {
             count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`' . $field . '`'))) > 0
         );
     }
+    assertSameValue(
+        'Campo genérico de configuração dos componentes',
+        true,
+        count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`settings_json` LONGTEXT'))) > 0
+    );
 }
