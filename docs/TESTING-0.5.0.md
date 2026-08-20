@@ -65,6 +65,15 @@
 5. Confirme que rótulos em séries maiores são espaçados automaticamente, sem sobreposição excessiva.
 6. Teste as larguras `4/12`, `6/12` e `12/12`.
 
+## Apache ECharts
+
+1. Confirme tooltips ao passar o mouse sobre barras, pontos, setores e Gauge.
+2. Use o botão de exportação e confirme o download do gráfico como imagem.
+3. Em uma linha com mais de 12 períodos, teste zoom e rolagem horizontal.
+4. Redimensione a janela e confirme que todos os gráficos se ajustam ao cartão.
+5. Desative temporariamente o carregamento de `vendor/echarts/echarts.min.js` no navegador e confirme que o fallback Canvas ainda apresenta os gráficos.
+6. Confirme que a página não faz requisições para CDN ou serviços externos.
+
 ## Regressão
 
 1. Confirme indicadores numéricos, tabelas, barras, linhas e roscas.

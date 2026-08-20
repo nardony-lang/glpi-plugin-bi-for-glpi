@@ -30,6 +30,8 @@ function plugin_init_biforglpi(): void
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/sqllab.js';
     }
     if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/dashboard.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/dashboard-canvas.js';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'vendor/echarts/echarts.min.js';
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/dashboard.js';
     }
     if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/widget.form.php')) {

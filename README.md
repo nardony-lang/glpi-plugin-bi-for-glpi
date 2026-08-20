@@ -101,6 +101,11 @@ Gráficos de barras permitem orientação vertical ou horizontal, cor única ou
 paleta, valores, grade, casas decimais e unidade. Gráficos de linha permitem
 configurar cor, escala, valores, pontos, preenchimento da área e suavização.
 
+Os gráficos são renderizados com **Apache ECharts 6.1.0**, empacotado no próprio
+plugin para funcionar sem CDN ou acesso à internet. O renderizador Canvas
+anterior permanece disponível como fallback automático caso a biblioteca não
+possa ser inicializada.
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 

@@ -45,6 +45,14 @@ assertSameValue(
     is_file(__DIR__ . '/../public/js/sqllab.js')
 );
 assertSameValue('JavaScript de gráficos local', true, is_file(__DIR__ . '/../public/js/dashboard.js'));
+assertSameValue('Fallback Canvas local', true, is_file(__DIR__ . '/../public/js/dashboard-canvas.js'));
+assertSameValue('Apache ECharts empacotado localmente', true, is_file(__DIR__ . '/../public/vendor/echarts/echarts.min.js'));
+assertSameValue(
+    'Integridade do Apache ECharts 6.1.0',
+    'b66b25aeb4df84e33199dc21694014d336d222cbd9deb0e5a7c14bd6aa0d0fd0',
+    hash_file('sha256', __DIR__ . '/../public/vendor/echarts/echarts.min.js')
+);
+assertSameValue('Licença do Apache ECharts incluída', true, is_file(__DIR__ . '/../public/vendor/echarts/LICENSE.txt'));
 assertSameValue('JavaScript de configuração do Gauge', true, is_file(__DIR__ . '/../public/js/widget.js'));
 assertSameValue('JavaScript do editor visual', true, is_file(__DIR__ . '/../public/js/builder.js'));
 assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
