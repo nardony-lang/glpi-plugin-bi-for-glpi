@@ -86,19 +86,19 @@
     const unsupportedColorFunction = /(?:^|[\s,(])(?:color|color-mix|lab|lch|oklab|oklch)\(/i;
     const exportColorProperties = [
         'color',
-        'backgroundColor',
-        'borderTopColor',
-        'borderRightColor',
-        'borderBottomColor',
-        'borderLeftColor',
-        'outlineColor',
-        'textDecorationColor',
+        'background-color',
+        'border-top-color',
+        'border-right-color',
+        'border-bottom-color',
+        'border-left-color',
+        'outline-color',
+        'text-decoration-color',
         'fill',
         'stroke',
     ];
 
-    function colorConverter() {
-        const canvas = document.createElement('canvas');
+    function colorConverter(ownerDocument) {
+        const canvas = ownerDocument.createElement('canvas');
         canvas.width = 1;
         canvas.height = 1;
         return canvas.getContext('2d', {willReadFrequently: true});
@@ -118,19 +118,32 @@
     }
 
     function sanitizeExportColors(root) {
-        const context = colorConverter();
+        const ownerDocument = root.ownerDocument;
+        const view = ownerDocument.defaultView || window;
+        const context = colorConverter(ownerDocument);
         if (!context) return;
         const cache = new Map();
+        root.setAttribute('data-biforglpi-export-copy', '');
+        const pseudoStyle = ownerDocument.createElement('style');
+        pseudoStyle.setAttribute('data-html2canvas-ignore', 'true');
+        pseudoStyle.textContent = '[data-biforglpi-export-copy]::before,[data-biforglpi-export-copy]::after,'
+            + '[data-biforglpi-export-copy] *::before,[data-biforglpi-export-copy] *::after{'
+            + 'content:none!important;color:#000!important;background:transparent!important;'
+            + 'border-color:transparent!important;box-shadow:none!important;text-shadow:none!important}';
+        root.prepend(pseudoStyle);
         [root, ...root.querySelectorAll('*')].forEach((element) => {
-            const computed = window.getComputedStyle(element);
+            if (!(element instanceof view.HTMLElement) && !(element instanceof view.SVGElement)) return;
+            const computed = view.getComputedStyle(element);
             exportColorProperties.forEach((property) => {
-                const value = computed[property];
+                const value = computed.getPropertyValue(property);
                 if (value && unsupportedColorFunction.test(value)) {
-                    element.style[property] = rgbaColor(value, context, cache);
+                    element.style.setProperty(property, rgbaColor(value, context, cache), 'important');
                 }
             });
-            ['boxShadow', 'textShadow', 'backgroundImage'].forEach((property) => {
-                if (unsupportedColorFunction.test(computed[property] || '')) element.style[property] = 'none';
+            ['box-shadow', 'text-shadow', 'background-image'].forEach((property) => {
+                if (unsupportedColorFunction.test(computed.getPropertyValue(property) || '')) {
+                    element.style.setProperty(property, 'none', 'important');
+                }
             });
         });
     }
@@ -163,6 +176,10 @@
                 height: clone.scrollHeight,
                 windowWidth: clone.scrollWidth,
                 windowHeight: clone.scrollHeight,
+                onclone: (clonedDocument) => {
+                    const clonedRoot = clonedDocument.querySelector('[data-biforglpi-export-copy]');
+                    if (clonedRoot) sanitizeExportColors(clonedRoot);
+                },
             });
             const scaleY = canvas.height / Math.max(clone.scrollHeight, 1);
             return {canvas, rowBreaks: rowOffsets.map((offset) => Math.round(offset * scaleY))};
