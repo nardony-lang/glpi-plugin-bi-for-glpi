@@ -97,6 +97,10 @@ Cartões numéricos podem usar formatação automática ou de zero a seis casas
 decimais, prefixo, sufixo, meta e cores condicionais. As regras de cor usam duas
 faixas configuráveis e consideram valores maiores como melhores.
 
+Gráficos de barras permitem orientação vertical ou horizontal, cor única ou
+paleta, valores, grade, casas decimais e unidade. Gráficos de linha permitem
+configurar cor, escala, valores, pontos, preenchimento da área e suavização.
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 

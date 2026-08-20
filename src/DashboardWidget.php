@@ -44,6 +44,35 @@ final class DashboardWidget
         ];
     }
 
+    /** @return array<string, int|string> */
+    public static function defaultBarSettings(): array
+    {
+        return [
+            'orientation' => 'vertical',
+            'color' => '#206bc4',
+            'use_palette' => 0,
+            'show_values' => 1,
+            'show_grid' => 1,
+            'decimals' => -1,
+            'unit' => '',
+        ];
+    }
+
+    /** @return array<string, int|string> */
+    public static function defaultLineSettings(): array
+    {
+        return [
+            'color' => '#206bc4',
+            'show_values' => 0,
+            'show_grid' => 1,
+            'show_points' => 1,
+            'fill_area' => 1,
+            'smooth' => 1,
+            'decimals' => -1,
+            'unit' => '',
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     public static function allForDashboard(int $dashboardId): array
     {
@@ -245,6 +274,9 @@ final class DashboardWidget
         if ($type === 'number') {
             return self::validateNumberSettings($input);
         }
+        if ($type === 'bar' || $type === 'line') {
+            return self::validateChartSettings($input, $type);
+        }
         if ($type !== 'gauge') {
             return null;
         }
@@ -313,6 +345,60 @@ final class DashboardWidget
             $settings[$field] = $color;
         }
 
+        return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
+
+    /** @param array<string, mixed> $input */
+    private static function validateChartSettings(array $input, string $type): string
+    {
+        $provided = [];
+        $encoded = trim((string) ($input['settings_json'] ?? ''));
+        if ($encoded !== '') {
+            try {
+                $decoded = json_decode($encoded, true, 16, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw new InvalidArgumentException('A configuração do gráfico é inválida.', 0, $exception);
+            }
+            if (!is_array($decoded)) {
+                throw new InvalidArgumentException('A configuração do gráfico é inválida.');
+            }
+            $provided = $decoded;
+        }
+
+        $prefix = $type . '_';
+        $defaults = $type === 'bar' ? self::defaultBarSettings() : self::defaultLineSettings();
+        $decimals = filter_var($input[$prefix . 'decimals'] ?? $provided['decimals'] ?? $defaults['decimals'], FILTER_VALIDATE_INT);
+        if ($decimals === false || $decimals < -1 || $decimals > 6) {
+            throw new InvalidArgumentException('As casas decimais do gráfico devem estar entre 0 e 6, ou no modo automático.');
+        }
+        $unit = trim((string) ($input[$prefix . 'unit'] ?? $provided['unit'] ?? $defaults['unit']));
+        if (strlen($unit) > 20) {
+            throw new InvalidArgumentException('A unidade do gráfico deve ter até 20 caracteres.');
+        }
+        $color = strtolower((string) ($input[$prefix . 'color'] ?? $provided['color'] ?? $defaults['color']));
+        if (preg_match('/^#[0-9a-f]{6}$/', $color) !== 1) {
+            throw new InvalidArgumentException('A cor do gráfico deve estar no formato hexadecimal.');
+        }
+
+        $settings = [
+            'color' => $color,
+            'show_values' => !empty($input[$prefix . 'show_values'] ?? $provided['show_values'] ?? $defaults['show_values']) ? 1 : 0,
+            'show_grid' => !empty($input[$prefix . 'show_grid'] ?? $provided['show_grid'] ?? $defaults['show_grid']) ? 1 : 0,
+            'decimals' => (int) $decimals,
+            'unit' => $unit,
+        ];
+        if ($type === 'bar') {
+            $orientation = (string) ($input['bar_orientation'] ?? $provided['orientation'] ?? $defaults['orientation']);
+            if (!in_array($orientation, ['vertical', 'horizontal'], true)) {
+                throw new InvalidArgumentException('A orientação do gráfico de barras é inválida.');
+            }
+            $settings['orientation'] = $orientation;
+            $settings['use_palette'] = !empty($input['bar_use_palette'] ?? $provided['use_palette'] ?? $defaults['use_palette']) ? 1 : 0;
+        } else {
+            foreach (['show_points', 'fill_area', 'smooth'] as $field) {
+                $settings[$field] = !empty($input['line_' . $field] ?? $provided[$field] ?? $defaults[$field]) ? 1 : 0;
+            }
+        }
         return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
@@ -391,6 +477,10 @@ final class DashboardWidget
             $row['settings'] = array_merge(self::defaultGaugeSettings(), $row['settings']);
         } elseif ($row['widget_type'] === 'number') {
             $row['settings'] = array_merge(self::defaultNumberSettings(), $row['settings']);
+        } elseif ($row['widget_type'] === 'bar') {
+            $row['settings'] = array_merge(self::defaultBarSettings(), $row['settings']);
+        } elseif ($row['widget_type'] === 'line') {
+            $row['settings'] = array_merge(self::defaultLineSettings(), $row['settings']);
         }
         return $row;
     }

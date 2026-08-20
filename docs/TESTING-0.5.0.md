@@ -46,6 +46,25 @@
 9. Confirme que todos os rótulos dos campos numéricos e do Gauge permanecem legíveis no tema utilizado pelo GLPI.
 10. Antes de salvar, alterne entre **Indicador numérico**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente permanece visível.
 
+## Gráfico de barras
+
+1. Crie um componente de barras com quatro ou mais categorias e ative os dados de demonstração.
+2. Confirme a grade, a escala numérica e os valores sobre as barras.
+3. Troque a cor principal e depois ative **Usar uma cor por barra**.
+4. Teste casas decimais e unidade `%`.
+5. Mude para orientação horizontal e use nomes longos de grupos; confirme que os rótulos permanecem legíveis.
+6. Desative valores e grade e confirme que o gráfico fica mais limpo sem perder os rótulos.
+7. Teste as larguras `4/12`, `6/12` e `12/12`.
+
+## Gráfico de linha
+
+1. Crie uma série mensal com pelo menos seis períodos.
+2. Confirme a grade, a escala, os pontos e a evolução temporal.
+3. Altere a cor, as casas decimais e a unidade.
+4. Ative e desative separadamente valores, pontos, preenchimento da área e suavização.
+5. Confirme que rótulos em séries maiores são espaçados automaticamente, sem sobreposição excessiva.
+6. Teste as larguras `4/12`, `6/12` e `12/12`.
+
 ## Regressão
 
 1. Confirme indicadores numéricos, tabelas, barras, linhas e roscas.

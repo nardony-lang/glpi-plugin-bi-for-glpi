@@ -32,7 +32,7 @@ final class WidgetRenderer
                 'columns' => $columns,
                 'rows' => $rows,
                 'elapsed_ms' => $elapsedMs,
-                'chart' => $this->chartData($rows),
+                'chart' => $this->chartData($rows, $widget),
                 'gauge' => $this->gaugeData($rows, $widget),
                 'number' => $number,
                 'value' => $number['value'],
@@ -45,8 +45,8 @@ final class WidgetRenderer
         }
     }
 
-    /** @param list<array<string, mixed>> $rows @return array{labels:list<string>,values:list<float>} */
-    private function chartData(array $rows): array
+    /** @param list<array<string, mixed>> $rows @param array<string, mixed> $widget @return array<string, mixed> */
+    private function chartData(array $rows, array $widget): array
     {
         $labels = [];
         $values = [];
@@ -58,7 +58,14 @@ final class WidgetRenderer
             $labels[] = (string) $valuesInRow[0];
             $values[] = (float) $valuesInRow[1];
         }
-        return ['labels' => $labels, 'values' => $values];
+        $type = (string) ($widget['widget_type'] ?? '');
+        $settings = [];
+        if ($type === 'bar') {
+            $settings = array_merge(DashboardWidget::defaultBarSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
+        } elseif ($type === 'line') {
+            $settings = array_merge(DashboardWidget::defaultLineSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
+        }
+        return ['labels' => $labels, 'values' => $values, 'settings' => $settings];
     }
 
     /** @param list<array<string, mixed>> $rows */

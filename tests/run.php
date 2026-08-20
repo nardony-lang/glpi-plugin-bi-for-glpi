@@ -142,9 +142,43 @@ $widget = DashboardWidget::validate([
     'position' => 2,
     'width' => 6,
     'demo_data' => '[{"grupo":"Service Desk","total":15}]',
+    'bar_orientation' => 'horizontal',
+    'bar_color' => '#206bc4',
+    'bar_use_palette' => 1,
+    'bar_show_values' => 1,
+    'bar_show_grid' => 1,
+    'bar_decimals' => 0,
+    'bar_unit' => '',
 ]);
+$barSettings = json_decode((string) $widget['settings_json'], true);
 assertSameValue('Componente gráfico', 'bar', $widget['widget_type']);
 assertSameValue('Largura do componente', 6, $widget['width']);
+assertSameValue('Orientação das barras', 'horizontal', $barSettings['orientation'] ?? null);
+assertSameValue('Paleta das barras', 1, $barSettings['use_palette'] ?? null);
+$barRender = (new WidgetRenderer())->prepare(
+    ['widget_type' => 'bar', 'demo_data' => $widget['demo_data'], 'settings' => $barSettings],
+    ['query_sql' => 'SELECT grupo, total', 'row_limit' => 10],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Configuração de barras no renderizador', 'horizontal', $barRender['chart']['settings']['orientation'] ?? null);
+
+$lineWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'line',
+    'line_color' => '#6f42c1',
+    'line_show_values' => 1,
+    'line_show_grid' => 1,
+    'line_show_points' => 1,
+    'line_fill_area' => 1,
+    'line_smooth' => 1,
+    'line_decimals' => 1,
+    'line_unit' => '%',
+]);
+$lineSettings = json_decode((string) $lineWidget['settings_json'], true);
+assertSameValue('Cor do gráfico de linha', '#6f42c1', $lineSettings['color'] ?? null);
+assertSameValue('Área preenchida da linha', 1, $lineSettings['fill_area'] ?? null);
+assertSameValue('Unidade da linha', '%', $lineSettings['unit'] ?? null);
 
 $gaugeWidget = DashboardWidget::validate([
     'savedqueries_id' => 1,
@@ -212,6 +246,21 @@ foreach (
             'widget_type' => 'number',
         ], $invalidNumberSettings));
         throw new RuntimeException('Configuração numérica inválida foi aceita.');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
+
+foreach (
+    [
+        ['widget_type' => 'bar', 'bar_orientation' => 'diagonal'],
+        ['widget_type' => 'line', 'line_decimals' => 7],
+        ['widget_type' => 'bar', 'bar_color' => 'azul'],
+    ] as $invalidChartSettings
+) {
+    try {
+        DashboardWidget::validate(['savedqueries_id' => 1] + $invalidChartSettings);
+        throw new RuntimeException('Configuração de gráfico inválida foi aceita.');
     } catch (InvalidArgumentException) {
         // Expected.
     }
