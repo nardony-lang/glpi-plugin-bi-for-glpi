@@ -173,15 +173,37 @@
     }
 
     function drawDoughnut(context, width, height, data) {
+        const settings = Object.assign({legend_position: 'right', hole_size: 52, show_labels: 1, show_percentages: 1, decimals: 0, unit: ''}, data.settings || {});
         const total = data.values.reduce((sum, value) => sum + Math.max(value, 0), 0) || 1;
-        const centerX = Math.min(width * 0.36, 180), centerY = height / 2, radius = Math.min(100, width * 0.25), inner = radius * 0.56;
+        const legendVisible = settings.legend_position !== 'hidden';
+        const legendAtBottom = settings.legend_position === 'bottom' || width < 560;
+        const centerX = legendVisible && !legendAtBottom ? Math.min(width * 0.36, 180) : width / 2;
+        const centerY = legendAtBottom ? height * 0.4 : height / 2;
+        const radius = Math.min(100, width * (legendVisible && !legendAtBottom ? 0.25 : 0.28));
+        const inner = radius * Math.max(0.2, Math.min(0.7, Number(settings.hole_size) / 100 || 0.52));
         let angle = -Math.PI / 2;
         data.values.forEach((value, index) => {
             const next = angle + (Math.max(value, 0) / total) * Math.PI * 2;
             context.beginPath(); context.arc(centerX, centerY, radius, angle, next); context.arc(centerX, centerY, inner, next, angle, true); context.closePath(); context.fillStyle = colors[index % colors.length]; context.fill(); angle = next;
         });
+        if (!legendVisible) return;
+        const legendText = (label, index) => {
+            const value = Number(data.values[index]);
+            const suffix = settings.show_percentages
+                ? formatValue((Math.max(value, 0) / total) * 100, {decimals: settings.decimals, unit: '%'})
+                : formatValue(value, settings);
+            return `${String(label).slice(0, 20)}: ${suffix}`;
+        };
+        if (legendAtBottom) {
+            const columnWidth = Math.max(140, width / 2 - 24);
+            data.labels.slice(0, 6).forEach((label, index) => {
+                const column = index % 2, row = Math.floor(index / 2), x = 18 + column * columnWidth, y = height - 70 + row * 22;
+                context.fillStyle = colors[index % colors.length]; context.fillRect(x, y, 11, 11); context.fillStyle = '#182433'; context.textAlign = 'left'; context.fillText(legendText(label, index), x + 17, y + 10, columnWidth - 22);
+            });
+            return;
+        }
         const legendX = centerX + radius + 24;
-        data.labels.slice(0, 8).forEach((label, index) => { context.fillStyle = colors[index % colors.length]; context.fillRect(legendX, 34 + index * 27, 12, 12); context.fillStyle = '#182433'; context.textAlign = 'left'; context.fillText(`${String(label).slice(0, 20)}: ${data.values[index]}`, legendX + 20, 44 + index * 27, Math.max(width - legendX - 24, 80)); });
+        data.labels.slice(0, 8).forEach((label, index) => { context.fillStyle = colors[index % colors.length]; context.fillRect(legendX, 34 + index * 27, 12, 12); context.fillStyle = '#182433'; context.textAlign = 'left'; context.fillText(legendText(label, index), legendX + 20, 44 + index * 27, Math.max(width - legendX - 24, 80)); });
     }
 
     function drawGauge(context, width, height, data) {

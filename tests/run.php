@@ -188,6 +188,28 @@ assertSameValue('Cor do gráfico de linha', '#6f42c1', $lineSettings['color'] ??
 assertSameValue('Área preenchida da linha', 1, $lineSettings['fill_area'] ?? null);
 assertSameValue('Unidade da linha', '%', $lineSettings['unit'] ?? null);
 
+$doughnutWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'doughnut',
+    'doughnut_legend_position' => 'bottom',
+    'doughnut_hole_size' => 60,
+    'doughnut_show_labels' => 1,
+    'doughnut_show_percentages' => 1,
+    'doughnut_decimals' => 1,
+    'doughnut_unit' => ' h',
+]);
+$doughnutSettings = json_decode((string) $doughnutWidget['settings_json'], true);
+assertSameValue('Posição da legenda da rosca', 'bottom', $doughnutSettings['legend_position'] ?? null);
+assertSameValue('Tamanho do centro da rosca', 60, $doughnutSettings['hole_size'] ?? null);
+assertSameValue('Percentuais da rosca', 1, $doughnutSettings['show_percentages'] ?? null);
+$doughnutRender = (new WidgetRenderer())->prepare(
+    ['widget_type' => 'doughnut', 'demo_data' => '[{"grupo":"N1","total":12},{"grupo":"N2","total":8}]', 'settings' => $doughnutSettings],
+    ['query_sql' => 'SELECT grupo, total', 'row_limit' => 10],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Configuração de rosca no renderizador', 'bottom', $doughnutRender['chart']['settings']['legend_position'] ?? null);
+
 $gaugeWidget = DashboardWidget::validate([
     'savedqueries_id' => 1,
     'widget_type' => 'gauge',
@@ -264,6 +286,8 @@ foreach (
         ['widget_type' => 'bar', 'bar_orientation' => 'diagonal'],
         ['widget_type' => 'line', 'line_decimals' => 7],
         ['widget_type' => 'bar', 'bar_color' => 'azul'],
+        ['widget_type' => 'doughnut', 'doughnut_hole_size' => 90],
+        ['widget_type' => 'doughnut', 'doughnut_legend_position' => 'left'],
     ] as $invalidChartSettings
 ) {
     try {

@@ -73,6 +73,19 @@ final class DashboardWidget
         ];
     }
 
+    /** @return array<string, int|string> */
+    public static function defaultDoughnutSettings(): array
+    {
+        return [
+            'legend_position' => 'right',
+            'hole_size' => 52,
+            'show_labels' => 1,
+            'show_percentages' => 1,
+            'decimals' => 0,
+            'unit' => '',
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     public static function allForDashboard(int $dashboardId): array
     {
@@ -277,6 +290,9 @@ final class DashboardWidget
         if ($type === 'bar' || $type === 'line') {
             return self::validateChartSettings($input, $type);
         }
+        if ($type === 'doughnut') {
+            return self::validateDoughnutSettings($input);
+        }
         if ($type !== 'gauge') {
             return null;
         }
@@ -345,6 +361,52 @@ final class DashboardWidget
             $settings[$field] = $color;
         }
 
+        return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
+
+    /** @param array<string, mixed> $input */
+    private static function validateDoughnutSettings(array $input): string
+    {
+        $provided = [];
+        $encoded = trim((string) ($input['settings_json'] ?? ''));
+        if ($encoded !== '') {
+            try {
+                $decoded = json_decode($encoded, true, 16, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw new InvalidArgumentException('A configuração do gráfico de rosca é inválida.', 0, $exception);
+            }
+            if (!is_array($decoded)) {
+                throw new InvalidArgumentException('A configuração do gráfico de rosca é inválida.');
+            }
+            $provided = $decoded;
+        }
+
+        $defaults = self::defaultDoughnutSettings();
+        $legendPosition = (string) ($input['doughnut_legend_position'] ?? $provided['legend_position'] ?? $defaults['legend_position']);
+        if (!in_array($legendPosition, ['right', 'bottom', 'hidden'], true)) {
+            throw new InvalidArgumentException('A posição da legenda do gráfico de rosca é inválida.');
+        }
+        $holeSize = filter_var($input['doughnut_hole_size'] ?? $provided['hole_size'] ?? $defaults['hole_size'], FILTER_VALIDATE_INT);
+        if ($holeSize === false || $holeSize < 20 || $holeSize > 70) {
+            throw new InvalidArgumentException('O tamanho do centro da rosca deve estar entre 20 e 70%.');
+        }
+        $decimals = filter_var($input['doughnut_decimals'] ?? $provided['decimals'] ?? $defaults['decimals'], FILTER_VALIDATE_INT);
+        if ($decimals === false || $decimals < -1 || $decimals > 6) {
+            throw new InvalidArgumentException('As casas decimais do gráfico de rosca devem estar entre 0 e 6, ou no modo automático.');
+        }
+        $unit = trim((string) ($input['doughnut_unit'] ?? $provided['unit'] ?? $defaults['unit']));
+        if (strlen($unit) > 20) {
+            throw new InvalidArgumentException('A unidade do gráfico de rosca deve ter até 20 caracteres.');
+        }
+
+        $settings = [
+            'legend_position' => $legendPosition,
+            'hole_size' => (int) $holeSize,
+            'show_labels' => !empty($input['doughnut_show_labels'] ?? $provided['show_labels'] ?? $defaults['show_labels']) ? 1 : 0,
+            'show_percentages' => !empty($input['doughnut_show_percentages'] ?? $provided['show_percentages'] ?? $defaults['show_percentages']) ? 1 : 0,
+            'decimals' => (int) $decimals,
+            'unit' => $unit,
+        ];
         return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
@@ -481,6 +543,8 @@ final class DashboardWidget
             $row['settings'] = array_merge(self::defaultBarSettings(), $row['settings']);
         } elseif ($row['widget_type'] === 'line') {
             $row['settings'] = array_merge(self::defaultLineSettings(), $row['settings']);
+        } elseif ($row['widget_type'] === 'doughnut') {
+            $row['settings'] = array_merge(self::defaultDoughnutSettings(), $row['settings']);
         }
         return $row;
     }

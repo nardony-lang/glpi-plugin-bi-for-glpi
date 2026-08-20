@@ -64,6 +64,8 @@ final class WidgetRenderer
             $settings = array_merge(DashboardWidget::defaultBarSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
         } elseif ($type === 'line') {
             $settings = array_merge(DashboardWidget::defaultLineSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
+        } elseif ($type === 'doughnut') {
+            $settings = array_merge(DashboardWidget::defaultDoughnutSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
         }
         return ['labels' => $labels, 'values' => $values, 'settings' => $settings];
     }

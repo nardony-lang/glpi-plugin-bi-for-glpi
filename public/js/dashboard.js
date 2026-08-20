@@ -157,27 +157,39 @@
     }
 
     function doughnutOption(data, theme, compact) {
+        const settings = Object.assign({legend_position: 'right', hole_size: 52, show_labels: 1, show_percentages: 1, decimals: 0, unit: ''}, data.settings || {});
         const items = data.labels.map((label, index) => ({name: String(label), value: data.values[index]}));
+        const legendVisible = settings.legend_position !== 'hidden';
+        const legendAtBottom = compact || settings.legend_position === 'bottom';
+        const outerRadius = compact ? 68 : (legendVisible && !legendAtBottom ? 76 : 80);
+        const innerRadius = Math.min(Number(settings.hole_size) || 52, outerRadius - 8);
+        const percentage = (value) => formatValue(value, {decimals: settings.decimals, unit: '%'});
+        const itemLabel = (params) => settings.show_percentages
+            ? `${params.name}: ${percentage(params.percent)}`
+            : `${params.name}: ${formatValue(params.value, settings)}`;
         return {
             aria: {enabled: true},
             animationDuration: 450,
             color: palette,
             textStyle: {color: theme.text, fontFamily: 'system-ui, sans-serif'},
-            tooltip: {trigger: 'item', formatter: '{b}: {c} ({d}%)'},
+            tooltip: {
+                trigger: 'item',
+                formatter: (params) => `${params.name}: ${formatValue(params.value, settings)} (${percentage(params.percent)})`,
+            },
             toolbox: toolbox(),
-            legend: compact
-                ? {type: 'scroll', bottom: 0, left: 'center', textStyle: {color: theme.secondary}}
-                : {type: 'scroll', orient: 'vertical', right: 8, top: 42, bottom: 18, textStyle: {color: theme.secondary}},
+            legend: legendAtBottom
+                ? {show: legendVisible, type: 'scroll', bottom: 0, left: 'center', textStyle: {color: theme.secondary}}
+                : {show: legendVisible, type: 'scroll', orient: 'vertical', right: 8, top: 42, bottom: 18, textStyle: {color: theme.secondary}},
             series: [{
                 type: 'pie',
-                radius: compact ? ['42%', '68%'] : ['48%', '76%'],
-                center: compact ? ['50%', '44%'] : ['38%', '53%'],
+                radius: [`${innerRadius}%`, `${outerRadius}%`],
+                center: legendAtBottom ? ['50%', '44%'] : (legendVisible ? ['38%', '53%'] : ['50%', '53%']),
                 data: items,
                 minAngle: 2,
                 avoidLabelOverlap: true,
                 itemStyle: {borderColor: theme.background, borderWidth: 2, borderRadius: 4},
-                label: {show: !compact, color: theme.text, formatter: '{b}: {d}%'},
-                labelLine: {show: !compact},
+                label: {show: Boolean(settings.show_labels) && !compact, color: theme.text, formatter: itemLabel},
+                labelLine: {show: Boolean(settings.show_labels) && !compact},
                 emphasis: {scaleSize: 8},
             }],
         };

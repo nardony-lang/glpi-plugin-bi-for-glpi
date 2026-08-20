@@ -6,7 +6,8 @@
     const numberSettings = document.querySelector('#biforglpi-number-settings');
     const barSettings = document.querySelector('#biforglpi-bar-settings');
     const lineSettings = document.querySelector('#biforglpi-line-settings');
-    if (!type || !gaugeSettings || !numberSettings || !barSettings || !lineSettings) return;
+    const doughnutSettings = document.querySelector('#biforglpi-doughnut-settings');
+    if (!type || !gaugeSettings || !numberSettings || !barSettings || !lineSettings || !doughnutSettings) return;
 
     const update = () => {
         [
@@ -14,6 +15,7 @@
             [numberSettings, 'number'],
             [barSettings, 'bar'],
             [lineSettings, 'line'],
+            [doughnutSettings, 'doughnut'],
         ].forEach(([settings, expectedType]) => {
             const visible = type.value === expectedType;
             settings.hidden = !visible;

@@ -44,7 +44,7 @@
 7. Desative as cores e confirme que o cartão volta à cor padrão.
 8. Confirme que indicadores textuais, como tempo em `HH:MM:SS`, continuam funcionando no modo automático.
 9. Confirme que todos os rótulos dos campos numéricos e do Gauge permanecem legíveis no tema utilizado pelo GLPI.
-10. Antes de salvar, alterne entre **Indicador numérico**, **Barras**, **Linha**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente aparece imediatamente.
+10. Antes de salvar, alterne entre **Indicador numérico**, **Barras**, **Linha**, **Rosca**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente aparece imediatamente.
 
 ## Gráfico de barras
 
@@ -64,6 +64,16 @@
 4. Ative e desative separadamente valores, pontos, preenchimento da área e suavização.
 5. Confirme que rótulos em séries maiores são espaçados automaticamente, sem sobreposição excessiva.
 6. Teste as larguras `4/12`, `6/12` e `12/12`.
+
+## Gráfico de rosca
+
+1. Selecione **Gráfico de rosca** e confirme que seu bloco de configuração aparece imediatamente, antes de salvar.
+2. Alterne a legenda entre direita, abaixo e oculta.
+3. Altere o tamanho do centro entre `20%` e `70%` e confirme a mudança visual.
+4. Ative e desative os rótulos e a apresentação de percentuais.
+5. Teste casas decimais e uma unidade ou sufixo nos valores e tooltips.
+6. Salve, abra novamente o componente e confirme que todas as opções foram preservadas.
+7. Teste os mesmos dados com o fallback Canvas e confirme legenda, centro, percentuais e unidade.
 
 ## Apache ECharts
 
