@@ -4,7 +4,7 @@
 
 1. Atualize a branch de homologação no diretório `plugins/biforglpi`.
 2. Execute a atualização em **Configuração > Plugins**.
-3. Confirme a versão `0.5.0-rc1` e a preservação dos dashboards existentes.
+3. Confirme a versão `0.5.0` e a preservação dos dashboards existentes.
 
 ## Gauge
 
