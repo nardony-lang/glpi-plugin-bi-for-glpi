@@ -34,6 +34,7 @@ final class WidgetRenderer
                 'elapsed_ms' => $elapsedMs,
                 'chart' => $this->chartData($rows, $widget),
                 'gauge' => $this->gaugeData($rows, $widget),
+                'table' => $this->tableData($columns, $rows, $widget),
                 'number' => $number,
                 'value' => $number['value'],
             ];
@@ -64,6 +65,8 @@ final class WidgetRenderer
             $settings = array_merge(DashboardWidget::defaultBarSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
         } elseif ($type === 'line') {
             $settings = array_merge(DashboardWidget::defaultLineSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
+        } elseif ($type === 'doughnut') {
+            $settings = array_merge(DashboardWidget::defaultDoughnutSettings(), is_array($widget['settings'] ?? null) ? $widget['settings'] : []);
         }
         return ['labels' => $labels, 'values' => $values, 'settings' => $settings];
     }
@@ -125,6 +128,160 @@ final class WidgetRenderer
             is_array($widget['settings'] ?? null) ? $widget['settings'] : []
         );
         return ['value' => (float) $value] + $settings;
+    }
+
+    /**
+     * @param list<string> $columns
+     * @param list<array<string, mixed>> $rows
+     * @return array<string, mixed>
+     */
+    private function tableData(array $columns, array $rows, array $widget): array
+    {
+        $settings = array_merge(
+            DashboardWidget::defaultTableSettings(),
+            is_array($widget['settings'] ?? null) ? $widget['settings'] : []
+        );
+        $available = [];
+        foreach ($columns as $column) {
+            $available[strtolower($column)] = $column;
+        }
+
+        $definitions = [];
+        $configured = [];
+        foreach (is_array($settings['columns'] ?? null) ? $settings['columns'] : [] as $rule) {
+            if (!is_array($rule)) {
+                continue;
+            }
+            $requested = trim((string) ($rule['source'] ?? ''));
+            $key = strtolower($requested);
+            if ($requested === '' || !isset($available[$key]) || isset($configured[$key])) {
+                continue;
+            }
+            $source = $available[$key];
+            $definitions[] = $this->tableColumnDefinition($source, $rule);
+            $configured[$key] = true;
+        }
+        if (!empty($settings['show_unconfigured']) || $definitions === []) {
+            foreach ($columns as $column) {
+                $key = strtolower($column);
+                if (!isset($configured[$key])) {
+                    $definitions[] = $this->tableColumnDefinition($column, []);
+                }
+            }
+        }
+
+        $formattedRows = [];
+        foreach ($rows as $row) {
+            $cells = [];
+            foreach ($definitions as $definition) {
+                $cells[] = $this->tableCell($row[$definition['source']] ?? null, $definition);
+            }
+            $formattedRows[] = $cells;
+        }
+        return ['settings' => $settings, 'columns' => $definitions, 'rows' => $formattedRows];
+    }
+
+    /** @param array<string, mixed> $rule @return array<string, mixed> */
+    private function tableColumnDefinition(string $source, array $rule): array
+    {
+        $type = (string) ($rule['type'] ?? 'text');
+        $numericTypes = ['number', 'percentage', 'progress'];
+        $align = (string) ($rule['align'] ?? 'auto');
+        if ($align === 'auto') {
+            $align = in_array($type, $numericTypes, true) ? 'right' : (str_starts_with($type, 'sparkline_') ? 'center' : 'left');
+        }
+        return [
+            'source' => $source,
+            'label' => (string) (($rule['label'] ?? '') ?: $source),
+            'type' => $type,
+            'decimals' => (int) ($rule['decimals'] ?? -1),
+            'prefix' => (string) ($rule['prefix'] ?? ''),
+            'suffix' => (string) ($rule['suffix'] ?? ''),
+            'width' => (int) ($rule['width'] ?? 0),
+            'align' => $align,
+            'color' => (string) ($rule['color'] ?? '#206bc4'),
+            'min' => isset($rule['min']) && $rule['min'] !== null ? (float) $rule['min'] : null,
+            'max' => isset($rule['max']) && $rule['max'] !== null ? (float) $rule['max'] : null,
+        ];
+    }
+
+    /** @param array<string, mixed> $definition @return array<string, mixed> */
+    private function tableCell(mixed $raw, array $definition): array
+    {
+        $type = (string) $definition['type'];
+        $display = $raw === null
+            ? ''
+            : (is_scalar($raw) ? (string) $raw : (json_encode($raw, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: ''));
+        $cell = ['display' => $display, 'type' => $type];
+        if ($type === 'duration') {
+            if (is_numeric($raw)) {
+                $seconds = max(0, (int) round((float) $raw));
+                $cell['display'] = sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
+            }
+            return $cell;
+        }
+        if ($type === 'badge') {
+            $normalized = strtolower(trim($display));
+            $cell['badge_color'] = in_array($normalized, ['ativo', 'active', 'ok', 'sucesso', 'sim', 'solucionado'], true)
+                ? 'green'
+                : (in_array($normalized, ['atenção', 'atencao', 'pendente', 'planejado', 'em atendimento'], true)
+                    ? 'yellow'
+                    : (in_array($normalized, ['crítico', 'critico', 'erro', 'não', 'nao', 'atrasado'], true) ? 'red' : 'azure'));
+            return $cell;
+        }
+        if ($type === 'sparkline_line' || $type === 'sparkline_bar') {
+            $series = $this->tableSeries($raw);
+            $cell['series'] = $series;
+            $cell['display'] = $series === [] ? $display : $this->formatTableNumber((float) end($series), $definition);
+            $cell['color'] = $definition['color'];
+            return $cell;
+        }
+        if (!in_array($type, ['number', 'percentage', 'progress'], true) || !is_numeric($raw)) {
+            return $cell;
+        }
+
+        $numeric = (float) $raw;
+        $format = $definition;
+        if ($type === 'percentage' && $format['suffix'] === '') {
+            $format['suffix'] = '%';
+        }
+        $cell['display'] = $this->formatTableNumber($numeric, $format);
+        if ($type === 'progress') {
+            $min = $definition['min'] ?? 0.0;
+            $max = $definition['max'] ?? 100.0;
+            $range = $max - $min;
+            $cell['percent'] = $range > 0 ? max(0.0, min(100.0, (($numeric - $min) / $range) * 100.0)) : 0.0;
+            $cell['color'] = $definition['color'];
+        }
+        return $cell;
+    }
+
+    /** @return list<float> */
+    private function tableSeries(mixed $raw): array
+    {
+        $decoded = is_array($raw) ? $raw : json_decode((string) $raw, true);
+        if (!is_array($decoded) || !array_is_list($decoded)) {
+            return [];
+        }
+        $series = [];
+        foreach (array_slice($decoded, 0, 60) as $value) {
+            if (is_numeric($value)) {
+                $series[] = (float) $value;
+            }
+        }
+        return $series;
+    }
+
+    /** @param array<string, mixed> $definition */
+    private function formatTableNumber(float $value, array $definition): string
+    {
+        $decimals = (int) ($definition['decimals'] ?? -1);
+        if ($decimals < 0) {
+            $decimals = floor($value) === $value ? 0 : 2;
+        }
+        return (string) ($definition['prefix'] ?? '')
+            . number_format($value, $decimals, ',', '.')
+            . (string) ($definition['suffix'] ?? '');
     }
 
     /** @param array<string, mixed> $widget @return list<array<string, mixed>> */

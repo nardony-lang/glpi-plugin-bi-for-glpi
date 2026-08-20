@@ -44,7 +44,7 @@
 7. Desative as cores e confirme que o cartão volta à cor padrão.
 8. Confirme que indicadores textuais, como tempo em `HH:MM:SS`, continuam funcionando no modo automático.
 9. Confirme que todos os rótulos dos campos numéricos e do Gauge permanecem legíveis no tema utilizado pelo GLPI.
-10. Antes de salvar, alterne entre **Indicador numérico**, **Barras**, **Linha**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente aparece imediatamente.
+10. Antes de salvar, alterne entre **Indicador numérico**, **Barras**, **Linha**, **Rosca**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente aparece imediatamente.
 
 ## Gráfico de barras
 
@@ -64,6 +64,45 @@
 4. Ative e desative separadamente valores, pontos, preenchimento da área e suavização.
 5. Confirme que rótulos em séries maiores são espaçados automaticamente, sem sobreposição excessiva.
 6. Teste as larguras `4/12`, `6/12` e `12/12`.
+
+## Gráfico de rosca
+
+1. Selecione **Gráfico de rosca** e confirme que seu bloco de configuração aparece imediatamente, antes de salvar.
+2. Alterne a legenda entre direita, abaixo e oculta.
+3. Altere o tamanho do centro entre `20%` e `70%` e confirme a mudança visual.
+4. Ative e desative os rótulos e a apresentação de percentuais.
+5. Teste casas decimais e uma unidade ou sufixo nos valores e tooltips.
+6. Salve, abra novamente o componente e confirme que todas as opções foram preservadas.
+7. Teste os mesmos dados com o fallback Canvas e confirme legenda, centro, percentuais e unidade.
+
+## Tabela analítica e minigráficos
+
+1. Edite um componente **Tabela** e confirme que o bloco de configuração aparece imediatamente.
+2. Cadastre regras usando exatamente os aliases retornados pela consulta e altere título, ordem, largura e alinhamento.
+3. Desative **Exibir colunas não configuradas** e confirme que somente as regras cadastradas permanecem.
+4. Teste texto, número, percentual, duração em segundos, status e barra de progresso.
+5. Para um minigráfico, retorne uma lista JSON como `[18,24,21,31]` e teste linha e barras.
+6. Altere a cor do minigráfico e os limites mínimo e máximo da barra de progresso.
+7. Salve, reabra o componente e confirme que todas as regras e sua ordem foram preservadas.
+8. Abra uma tabela antiga sem regras e confirme que todas as colunas continuam visíveis como texto.
+9. Teste cabeçalho fixo, linhas alternadas e densidade compacta.
+
+## Exportação de tabelas
+
+1. Exporte uma tabela com minigráficos em PNG e confirme título, valores, cores e gráficos.
+2. Exporte a mesma tabela em PDF e confira legibilidade, orientação e quebra em várias páginas.
+3. Use uma tabela mais larga que o cartão e confirme que colunas fora da área de rolagem entram no arquivo.
+4. Desative separadamente as permissões de PNG e PDF e confirme que os respectivos botões desaparecem.
+5. Confirme que a exportação não faz requisições para CDN ou serviços externos.
+
+## Apache ECharts
+
+1. Confirme tooltips ao passar o mouse sobre barras, pontos, setores e Gauge.
+2. Use o botão de exportação e confirme o download do gráfico como imagem.
+3. Em uma linha com mais de 12 períodos, teste zoom e rolagem horizontal.
+4. Redimensione a janela e confirme que todos os gráficos se ajustam ao cartão.
+5. Desative temporariamente o carregamento de `vendor/echarts/echarts.min.js` no navegador e confirme que o fallback Canvas ainda apresenta os gráficos.
+6. Confirme que a página não faz requisições para CDN ou serviços externos.
 
 ## Regressão
 

@@ -101,6 +101,31 @@ Gráficos de barras permitem orientação vertical ou horizontal, cor única ou
 paleta, valores, grade, casas decimais e unidade. Gráficos de linha permitem
 configurar cor, escala, valores, pontos, preenchimento da área e suavização.
 
+Os gráficos são renderizados com **Apache ECharts 6.1.0**, empacotado no próprio
+plugin para funcionar sem CDN ou acesso à internet. O renderizador Canvas
+anterior permanece disponível como fallback automático caso a biblioteca não
+possa ser inicializada.
+
+Tabelas analíticas permitem ordenar, renomear e formatar colunas como texto,
+número, percentual, duração, status, barra de progresso ou minigráfico de linha
+e barras. As tabelas podem ser exportadas para PNG ou PDF diretamente no
+navegador. `html2canvas 1.4.1` e `jsPDF 4.2.1` são empacotados localmente; nenhum
+dado do dashboard é enviado a CDN ou serviço externo durante a exportação.
+
+Colunas com apresentação **Status** aplicam cores a partir do texto retornado
+pela consulta, sem diferenciar maiúsculas de minúsculas:
+
+| Cor | Valores reconhecidos |
+| --- | --- |
+| Verde | `Ativo`, `Active`, `OK`, `Sucesso`, `Sim`, `Solucionado` |
+| Amarelo | `Atenção`, `Atencao`, `Pendente`, `Planejado`, `Em atendimento` |
+| Vermelho | `Crítico`, `Critico`, `Erro`, `Não`, `Nao`, `Atrasado` |
+| Azul | qualquer outro texto |
+
+A consulta determina o texto e as faixas que produzem cada situação. A
+personalização dessas regras por componente está registrada no
+[roadmap](docs/ROADMAP.md).
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 
