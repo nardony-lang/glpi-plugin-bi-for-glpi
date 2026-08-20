@@ -10,6 +10,7 @@
         [[gaugeSettings, 'gauge'], [numberSettings, 'number']].forEach(([settings, expectedType]) => {
             const visible = type.value === expectedType;
             settings.hidden = !visible;
+            settings.classList.toggle('d-none', !visible);
             settings.querySelectorAll('input, select').forEach((input) => {
                 input.disabled = !visible;
             });
