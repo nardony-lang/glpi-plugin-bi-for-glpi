@@ -226,6 +226,86 @@
     }
 }
 
+.biforglpi-table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.biforglpi-analytics-table-wrap {
+    max-height: 34rem;
+}
+
+.biforglpi-analytics-table {
+    min-width: 100%;
+}
+
+.biforglpi-analytics-table th {
+    background: var(--tblr-bg-surface, #fff);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.biforglpi-analytics-table td {
+    max-width: 32rem;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+.biforglpi-sticky-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.biforglpi-progress-cell {
+    min-width: 9rem;
+}
+
+.biforglpi-progress-cell .progress {
+    margin-top: 0.35rem;
+}
+
+.biforglpi-sparkline-cell {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.65rem;
+    justify-content: center;
+    min-width: 10rem;
+}
+
+.biforglpi-sparkline {
+    display: block;
+    height: 2.25rem;
+    overflow: visible;
+    width: 7.5rem;
+}
+
+.biforglpi-table-column-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.biforglpi-table-column-rule {
+    background: color-mix(in srgb, var(--tblr-bg-surface, #fff) 94%, var(--tblr-primary, #206bc4));
+}
+
+.biforglpi-export-clone {
+    left: -100000px !important;
+    max-width: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    z-index: -1000 !important;
+}
+
+.biforglpi-export-clone .biforglpi-analytics-table-wrap {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
 @media (min-width: 577px) and (max-width: 992px) {
     .biforglpi-widget {
         grid-column: span 6;

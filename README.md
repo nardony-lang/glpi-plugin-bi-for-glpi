@@ -106,6 +106,12 @@ plugin para funcionar sem CDN ou acesso à internet. O renderizador Canvas
 anterior permanece disponível como fallback automático caso a biblioteca não
 possa ser inicializada.
 
+Tabelas analíticas permitem ordenar, renomear e formatar colunas como texto,
+número, percentual, duração, status, barra de progresso ou minigráfico de linha
+e barras. As tabelas podem ser exportadas para PNG ou PDF diretamente no
+navegador. `html2canvas 1.4.1` e `jsPDF 4.2.1` são empacotados localmente; nenhum
+dado do dashboard é enviado a CDN ou serviço externo durante a exportação.
+
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
 

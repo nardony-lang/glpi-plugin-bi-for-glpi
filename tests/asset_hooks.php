@@ -131,7 +131,7 @@ namespace {
     plugin_init_biforglpi();
     assertSameValue(
         'JavaScript do dashboard no GLPI 11',
-        ['js/dashboard-canvas.js', 'vendor/echarts/echarts.min.js', 'js/dashboard.js'],
+        ['vendor/html2canvas/html2canvas.min.js', 'vendor/jspdf/jspdf.umd.min.js', 'js/dashboard-canvas.js', 'vendor/echarts/echarts.min.js', 'js/dashboard.js', 'js/table.js'],
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
 
