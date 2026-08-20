@@ -43,6 +43,7 @@
 6. Teste valores abaixo de `80`, entre `80` e `94,99` e a partir de `95`.
 7. Desative as cores e confirme que o cartão volta à cor padrão.
 8. Confirme que indicadores textuais, como tempo em `HH:MM:SS`, continuam funcionando no modo automático.
+9. Confirme que todos os rótulos dos campos numéricos e do Gauge permanecem legíveis no tema utilizado pelo GLPI.
 
 ## Regressão
 
