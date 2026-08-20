@@ -53,6 +53,30 @@ assertSameValue(
     hash_file('sha256', __DIR__ . '/../public/vendor/echarts/echarts.min.js')
 );
 assertSameValue('Licença do Apache ECharts incluída', true, is_file(__DIR__ . '/../public/vendor/echarts/LICENSE.txt'));
+assertSameValue('JavaScript de tabelas analíticas', true, is_file(__DIR__ . '/../public/js/table.js'));
+$tableScript = file_get_contents(__DIR__ . '/../public/js/table.js');
+assertSameValue(
+    'Exportação normaliza cores CSS modernas para o html2canvas',
+    true,
+    is_string($tableScript)
+        && str_contains($tableScript, 'sanitizeExportColors(clone)')
+        && str_contains($tableScript, "'important'")
+        && str_contains($tableScript, 'onclone:')
+);
+assertSameValue('html2canvas empacotado localmente', true, is_file(__DIR__ . '/../public/vendor/html2canvas/html2canvas.min.js'));
+assertSameValue(
+    'Integridade do html2canvas 1.4.1',
+    'e87e550794322e574a1fda0c1549a3c70dae5a93d9113417a429016838eab8cb',
+    hash_file('sha256', __DIR__ . '/../public/vendor/html2canvas/html2canvas.min.js')
+);
+assertSameValue('Licença do html2canvas incluída', true, is_file(__DIR__ . '/../public/vendor/html2canvas/LICENSE.txt'));
+assertSameValue('jsPDF empacotado localmente', true, is_file(__DIR__ . '/../public/vendor/jspdf/jspdf.umd.min.js'));
+assertSameValue(
+    'Integridade do jsPDF 4.2.1',
+    'e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54',
+    hash_file('sha256', __DIR__ . '/../public/vendor/jspdf/jspdf.umd.min.js')
+);
+assertSameValue('Licença do jsPDF incluída', true, is_file(__DIR__ . '/../public/vendor/jspdf/LICENSE.txt'));
 assertSameValue('JavaScript de configuração do Gauge', true, is_file(__DIR__ . '/../public/js/widget.js'));
 assertSameValue('JavaScript do editor visual', true, is_file(__DIR__ . '/../public/js/builder.js'));
 assertSameValue('Logo próprio do plugin', true, is_file(__DIR__ . '/../logo.png'));
@@ -209,6 +233,65 @@ $doughnutRender = (new WidgetRenderer())->prepare(
     ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
 );
 assertSameValue('Configuração de rosca no renderizador', 'bottom', $doughnutRender['chart']['settings']['legend_position'] ?? null);
+
+$tableWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'table',
+    'table_striped' => 1,
+    'table_compact' => 1,
+    'table_sticky_header' => 1,
+    'table_show_unconfigured' => 0,
+    'table_export_png' => 1,
+    'table_export_pdf' => 1,
+    'table_column_source' => ['indicador', 'resultado', 'historico', 'tempo'],
+    'table_column_label' => ['Indicador', 'Resultado', 'Tendência', 'Tempo médio'],
+    'table_column_type' => ['text', 'progress', 'sparkline_line', 'duration'],
+    'table_column_decimals' => [-1, 1, 1, -1],
+    'table_column_prefix' => ['', '', '', ''],
+    'table_column_suffix' => ['', '%', '', ''],
+    'table_column_width' => [240, 180, 180, 120],
+    'table_column_align' => ['left', 'right', 'center', 'right'],
+    'table_column_color' => ['#206bc4', '#2fb344', '#6f42c1', '#206bc4'],
+    'table_column_min' => ['', 0, '', ''],
+    'table_column_max' => ['', 100, '', ''],
+]);
+$tableSettings = json_decode((string) $tableWidget['settings_json'], true);
+assertSameValue('Quatro colunas analíticas configuradas', 4, count($tableSettings['columns'] ?? []));
+assertSameValue('Exportação PDF da tabela', 1, $tableSettings['export_pdf'] ?? null);
+$tableRender = (new WidgetRenderer())->prepare(
+    ['widget_type' => 'table', 'demo_data' => '[{"indicador":"Cumprimento do ANS","resultado":96.4,"historico":[91,93,92,96.4],"tempo":1254}]', 'settings' => $tableSettings],
+    ['query_sql' => 'SELECT indicador, resultado, historico, tempo', 'row_limit' => 10],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Ordem das colunas analíticas', 'resultado', $tableRender['table']['columns'][1]['source'] ?? null);
+assertSameValue('Resultado formatado na tabela', '96,4%', $tableRender['table']['rows'][0][1]['display'] ?? null);
+assertSameValue('Percentual da barra de progresso', 96.4, $tableRender['table']['rows'][0][1]['percent'] ?? null);
+assertSameValue('Série do minigráfico', [91.0, 93.0, 92.0, 96.4], $tableRender['table']['rows'][0][2]['series'] ?? null);
+assertSameValue('Duração formatada na tabela', '00:20:54', $tableRender['table']['rows'][0][3]['display'] ?? null);
+
+$statusTableWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'table',
+    'table_column_source' => ['situacao'],
+    'table_column_label' => ['Situação'],
+    'table_column_type' => ['badge'],
+]);
+$statusTableSettings = json_decode((string) $statusTableWidget['settings_json'], true);
+$statusTableRender = (new WidgetRenderer())->prepare(
+    [
+        'widget_type' => 'table',
+        'demo_data' => '[{"situacao":"SUCESSO"},{"situacao":"Atenção"},{"situacao":"Crítico"},{"situacao":"Informativo"}]',
+        'settings' => $statusTableSettings,
+    ],
+    ['query_sql' => 'SELECT situacao', 'row_limit' => 10],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Status de sucesso usa verde', 'green', $statusTableRender['table']['rows'][0][0]['badge_color'] ?? null);
+assertSameValue('Status de atenção usa amarelo', 'yellow', $statusTableRender['table']['rows'][1][0]['badge_color'] ?? null);
+assertSameValue('Status crítico usa vermelho', 'red', $statusTableRender['table']['rows'][2][0]['badge_color'] ?? null);
+assertSameValue('Status desconhecido usa azul', 'azure', $statusTableRender['table']['rows'][3][0]['badge_color'] ?? null);
 
 $gaugeWidget = DashboardWidget::validate([
     'savedqueries_id' => 1,

@@ -86,6 +86,20 @@ final class DashboardWidget
         ];
     }
 
+    /** @return array<string, mixed> */
+    public static function defaultTableSettings(): array
+    {
+        return [
+            'striped' => 1,
+            'compact' => 1,
+            'sticky_header' => 0,
+            'show_unconfigured' => 1,
+            'export_png' => 1,
+            'export_pdf' => 1,
+            'columns' => [],
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     public static function allForDashboard(int $dashboardId): array
     {
@@ -284,6 +298,9 @@ final class DashboardWidget
     /** @param array<string, mixed> $input */
     private static function validateSettings(array $input, string $type): ?string
     {
+        if ($type === 'table') {
+            return self::validateTableSettings($input);
+        }
         if ($type === 'number') {
             return self::validateNumberSettings($input);
         }
@@ -297,6 +314,158 @@ final class DashboardWidget
             return null;
         }
         return self::validateGaugeSettings($input);
+    }
+
+    /** @param array<string, mixed> $input */
+    private static function validateTableSettings(array $input): string
+    {
+        $provided = [];
+        $encoded = trim((string) ($input['settings_json'] ?? ''));
+        if ($encoded !== '') {
+            try {
+                $decoded = json_decode($encoded, true, 32, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw new InvalidArgumentException('A configuração da tabela é inválida.', 0, $exception);
+            }
+            if (!is_array($decoded)) {
+                throw new InvalidArgumentException('A configuração da tabela é inválida.');
+            }
+            $provided = $decoded;
+        }
+
+        $defaults = self::defaultTableSettings();
+        $settings = [];
+        foreach (['striped', 'compact', 'sticky_header', 'show_unconfigured', 'export_png', 'export_pdf'] as $field) {
+            $settings[$field] = !empty($input['table_' . $field] ?? $provided[$field] ?? $defaults[$field]) ? 1 : 0;
+        }
+
+        $sources = is_array($input['table_column_source'] ?? null) ? $input['table_column_source'] : [];
+        if ($sources === [] && is_array($provided['columns'] ?? null)) {
+            $settings['columns'] = self::normalizeTableColumns($provided['columns']);
+            return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        }
+        if (count($sources) > 30) {
+            throw new InvalidArgumentException('A tabela permite configurar até 30 colunas.');
+        }
+
+        $columns = [];
+        $seen = [];
+        foreach ($sources as $index => $rawSource) {
+            $source = trim((string) $rawSource);
+            if ($source === '') {
+                continue;
+            }
+            $column = [
+                'source' => $source,
+                'label' => trim((string) (($input['table_column_label'][$index] ?? '') ?: $source)),
+                'type' => (string) ($input['table_column_type'][$index] ?? 'text'),
+                'decimals' => $input['table_column_decimals'][$index] ?? -1,
+                'prefix' => (string) ($input['table_column_prefix'][$index] ?? ''),
+                'suffix' => (string) ($input['table_column_suffix'][$index] ?? ''),
+                'width' => $input['table_column_width'][$index] ?? 0,
+                'align' => (string) ($input['table_column_align'][$index] ?? 'auto'),
+                'color' => (string) ($input['table_column_color'][$index] ?? '#206bc4'),
+                'min' => $input['table_column_min'][$index] ?? null,
+                'max' => $input['table_column_max'][$index] ?? null,
+            ];
+            $normalized = self::normalizeTableColumn($column);
+            $key = strtolower($normalized['source']);
+            if (isset($seen[$key])) {
+                throw new InvalidArgumentException('Cada coluna de origem pode ser configurada apenas uma vez.');
+            }
+            $seen[$key] = true;
+            $columns[] = $normalized;
+        }
+        $settings['columns'] = $columns;
+        return json_encode($settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
+
+    /** @param list<mixed> $columns @return list<array<string, mixed>> */
+    private static function normalizeTableColumns(array $columns): array
+    {
+        if (count($columns) > 30) {
+            throw new InvalidArgumentException('A tabela permite configurar até 30 colunas.');
+        }
+        $normalized = [];
+        $seen = [];
+        foreach ($columns as $column) {
+            if (!is_array($column) || trim((string) ($column['source'] ?? '')) === '') {
+                continue;
+            }
+            $item = self::normalizeTableColumn($column);
+            $key = strtolower($item['source']);
+            if (isset($seen[$key])) {
+                throw new InvalidArgumentException('Cada coluna de origem pode ser configurada apenas uma vez.');
+            }
+            $seen[$key] = true;
+            $normalized[] = $item;
+        }
+        return $normalized;
+    }
+
+    /** @param array<string, mixed> $column @return array<string, mixed> */
+    private static function normalizeTableColumn(array $column): array
+    {
+        $source = trim((string) ($column['source'] ?? ''));
+        $label = trim((string) ($column['label'] ?? $source));
+        if (strlen($source) > 128 || strlen($label) > 128) {
+            throw new InvalidArgumentException('Os nomes das colunas devem ter até 128 caracteres.');
+        }
+        $type = (string) ($column['type'] ?? 'text');
+        $types = ['text', 'number', 'percentage', 'duration', 'badge', 'progress', 'sparkline_line', 'sparkline_bar'];
+        if (!in_array($type, $types, true)) {
+            throw new InvalidArgumentException('O tipo de apresentação da coluna é inválido.');
+        }
+        $decimals = filter_var($column['decimals'] ?? -1, FILTER_VALIDATE_INT);
+        if ($decimals === false || $decimals < -1 || $decimals > 6) {
+            throw new InvalidArgumentException('As casas decimais da coluna devem estar entre 0 e 6, ou no modo automático.');
+        }
+        $prefix = (string) ($column['prefix'] ?? '');
+        $suffix = (string) ($column['suffix'] ?? '');
+        if (strlen($prefix) > 20 || strlen($suffix) > 20) {
+            throw new InvalidArgumentException('Prefixo e sufixo da coluna devem ter até 20 caracteres.');
+        }
+        $width = filter_var($column['width'] ?? 0, FILTER_VALIDATE_INT);
+        if ($width === false || ($width !== 0 && ($width < 60 || $width > 600))) {
+            throw new InvalidArgumentException('A largura da coluna deve ser automática ou ficar entre 60 e 600 pixels.');
+        }
+        $align = (string) ($column['align'] ?? 'auto');
+        if (!in_array($align, ['auto', 'left', 'center', 'right'], true)) {
+            throw new InvalidArgumentException('O alinhamento da coluna é inválido.');
+        }
+        $color = strtolower((string) ($column['color'] ?? '#206bc4'));
+        if (preg_match('/^#[0-9a-f]{6}$/', $color) !== 1) {
+            throw new InvalidArgumentException('A cor da coluna deve estar no formato hexadecimal.');
+        }
+        $limits = [];
+        foreach (['min', 'max'] as $field) {
+            $value = $column[$field] ?? null;
+            if ($value === '' || $value === null) {
+                $limits[$field] = null;
+                continue;
+            }
+            $numeric = filter_var($value, FILTER_VALIDATE_FLOAT);
+            if ($numeric === false) {
+                throw new InvalidArgumentException('Os limites da coluna devem ser numéricos.');
+            }
+            $limits[$field] = (float) $numeric;
+        }
+        if ($limits['min'] !== null && $limits['max'] !== null && $limits['min'] >= $limits['max']) {
+            throw new InvalidArgumentException('O limite mínimo da coluna deve ser menor que o máximo.');
+        }
+        return [
+            'source' => $source,
+            'label' => $label !== '' ? $label : $source,
+            'type' => $type,
+            'decimals' => (int) $decimals,
+            'prefix' => $prefix,
+            'suffix' => $suffix,
+            'width' => (int) $width,
+            'align' => $align,
+            'color' => $color,
+            'min' => $limits['min'],
+            'max' => $limits['max'],
+        ];
     }
 
     /** @param array<string, mixed> $input */
@@ -545,6 +714,8 @@ final class DashboardWidget
             $row['settings'] = array_merge(self::defaultLineSettings(), $row['settings']);
         } elseif ($row['widget_type'] === 'doughnut') {
             $row['settings'] = array_merge(self::defaultDoughnutSettings(), $row['settings']);
+        } elseif ($row['widget_type'] === 'table') {
+            $row['settings'] = array_merge(self::defaultTableSettings(), $row['settings']);
         }
         return $row;
     }

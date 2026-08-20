@@ -75,6 +75,26 @@
 6. Salve, abra novamente o componente e confirme que todas as opções foram preservadas.
 7. Teste os mesmos dados com o fallback Canvas e confirme legenda, centro, percentuais e unidade.
 
+## Tabela analítica e minigráficos
+
+1. Edite um componente **Tabela** e confirme que o bloco de configuração aparece imediatamente.
+2. Cadastre regras usando exatamente os aliases retornados pela consulta e altere título, ordem, largura e alinhamento.
+3. Desative **Exibir colunas não configuradas** e confirme que somente as regras cadastradas permanecem.
+4. Teste texto, número, percentual, duração em segundos, status e barra de progresso.
+5. Para um minigráfico, retorne uma lista JSON como `[18,24,21,31]` e teste linha e barras.
+6. Altere a cor do minigráfico e os limites mínimo e máximo da barra de progresso.
+7. Salve, reabra o componente e confirme que todas as regras e sua ordem foram preservadas.
+8. Abra uma tabela antiga sem regras e confirme que todas as colunas continuam visíveis como texto.
+9. Teste cabeçalho fixo, linhas alternadas e densidade compacta.
+
+## Exportação de tabelas
+
+1. Exporte uma tabela com minigráficos em PNG e confirme título, valores, cores e gráficos.
+2. Exporte a mesma tabela em PDF e confira legibilidade, orientação e quebra em várias páginas.
+3. Use uma tabela mais larga que o cartão e confirme que colunas fora da área de rolagem entram no arquivo.
+4. Desative separadamente as permissões de PNG e PDF e confirme que os respectivos botões desaparecem.
+5. Confirme que a exportação não faz requisições para CDN ou serviços externos.
+
 ## Apache ECharts
 
 1. Confirme tooltips ao passar o mouse sobre barras, pontos, setores e Gauge.
