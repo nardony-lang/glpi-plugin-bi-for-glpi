@@ -52,7 +52,7 @@ function plugin_version_biforglpi(): array
         'version'      => PLUGIN_BIFORGLPI_VERSION,
         'author'       => 'Douglas Nardoni',
         'license'      => 'GPL-3.0-or-later',
-        'homepage'     => 'https://github.com/nardony-lang/glpi-plugin-bi-for-glpi',
+        'homepage'     => 'https://github.com/nardony-lang/biforglpi',
         'requirements' => [
             'glpi' => [
                 'min' => PLUGIN_BIFORGLPI_MIN_GLPI_VERSION,

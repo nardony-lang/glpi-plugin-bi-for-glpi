@@ -15,7 +15,7 @@ O nome do diretório é parte da identidade do plugin e deve ser `biforglpi`:
 
 ```bash
 cd /caminho/do/glpi/plugins
-git clone https://github.com/nardony-lang/glpi-plugin-bi-for-glpi.git biforglpi
+git clone https://github.com/nardony-lang/biforglpi.git
 ```
 
 Depois, no GLPI, acesse **Configuração > Plugins**, instale e ative **BI for GLPI**.
