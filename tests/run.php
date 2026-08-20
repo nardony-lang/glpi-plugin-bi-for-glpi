@@ -54,6 +54,12 @@ assertSameValue(
 );
 assertSameValue('Licença do Apache ECharts incluída', true, is_file(__DIR__ . '/../public/vendor/echarts/LICENSE.txt'));
 assertSameValue('JavaScript de tabelas analíticas', true, is_file(__DIR__ . '/../public/js/table.js'));
+$tableScript = file_get_contents(__DIR__ . '/../public/js/table.js');
+assertSameValue(
+    'Exportação normaliza cores CSS modernas para o html2canvas',
+    true,
+    is_string($tableScript) && str_contains($tableScript, 'sanitizeExportColors(clone)')
+);
 assertSameValue('html2canvas empacotado localmente', true, is_file(__DIR__ . '/../public/vendor/html2canvas/html2canvas.min.js'));
 assertSameValue(
     'Integridade do html2canvas 1.4.1',

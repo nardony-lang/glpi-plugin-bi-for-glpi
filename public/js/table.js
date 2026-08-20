@@ -83,6 +83,58 @@
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    const unsupportedColorFunction = /(?:^|[\s,(])(?:color|color-mix|lab|lch|oklab|oklch)\(/i;
+    const exportColorProperties = [
+        'color',
+        'backgroundColor',
+        'borderTopColor',
+        'borderRightColor',
+        'borderBottomColor',
+        'borderLeftColor',
+        'outlineColor',
+        'textDecorationColor',
+        'fill',
+        'stroke',
+    ];
+
+    function colorConverter() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        return canvas.getContext('2d', {willReadFrequently: true});
+    }
+
+    function rgbaColor(value, context, cache) {
+        if (!unsupportedColorFunction.test(value)) return value;
+        if (cache.has(value)) return cache.get(value);
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = '#000000';
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data;
+        const converted = `rgba(${red}, ${green}, ${blue}, ${(alpha / 255).toFixed(3)})`;
+        cache.set(value, converted);
+        return converted;
+    }
+
+    function sanitizeExportColors(root) {
+        const context = colorConverter();
+        if (!context) return;
+        const cache = new Map();
+        [root, ...root.querySelectorAll('*')].forEach((element) => {
+            const computed = window.getComputedStyle(element);
+            exportColorProperties.forEach((property) => {
+                const value = computed[property];
+                if (value && unsupportedColorFunction.test(value)) {
+                    element.style[property] = rgbaColor(value, context, cache);
+                }
+            });
+            ['boxShadow', 'textShadow', 'backgroundImage'].forEach((property) => {
+                if (unsupportedColorFunction.test(computed[property] || '')) element.style[property] = 'none';
+            });
+        });
+    }
+
     async function captureWidget(widget) {
         if (typeof window.html2canvas !== 'function') throw new Error('html2canvas unavailable');
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -98,6 +150,7 @@
         });
         document.body.append(clone);
         try {
+            sanitizeExportColors(clone);
             const cloneTop = clone.getBoundingClientRect().top;
             const rowOffsets = Array.from(clone.querySelectorAll('.biforglpi-analytics-table tbody tr'))
                 .map((row) => row.getBoundingClientRect().bottom - cloneTop);
