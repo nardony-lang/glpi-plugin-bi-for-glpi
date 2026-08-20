@@ -24,6 +24,10 @@
         });
     };
 
-    type.addEventListener('change', update);
+    if (window.jQuery) {
+        window.jQuery(type).on('change.biforglpiWidget', update);
+    } else {
+        type.addEventListener('change', update);
+    }
     update();
 })();

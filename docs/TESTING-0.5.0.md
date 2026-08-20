@@ -44,7 +44,7 @@
 7. Desative as cores e confirme que o cartão volta à cor padrão.
 8. Confirme que indicadores textuais, como tempo em `HH:MM:SS`, continuam funcionando no modo automático.
 9. Confirme que todos os rótulos dos campos numéricos e do Gauge permanecem legíveis no tema utilizado pelo GLPI.
-10. Antes de salvar, alterne entre **Indicador numérico**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente permanece visível.
+10. Antes de salvar, alterne entre **Indicador numérico**, **Barras**, **Linha**, **Gauge** e outro tipo; confirme que somente o bloco de configuração correspondente aparece imediatamente.
 
 ## Gráfico de barras
 
