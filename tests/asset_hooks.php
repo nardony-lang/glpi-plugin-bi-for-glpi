@@ -131,7 +131,25 @@ namespace {
     plugin_init_biforglpi();
     assertSameValue(
         'JavaScript do dashboard no GLPI 11',
-        ['js/dashboard.js'],
+        ['vendor/html2canvas/html2canvas.min.js', 'vendor/jspdf/jspdf.umd.min.js', 'js/dashboard-canvas.js', 'vendor/echarts/echarts.min.js', 'js/dashboard.js', 'js/table.js'],
+        $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
+    );
+
+    $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/widget.form.php';
+    $PLUGIN_HOOKS = [];
+    plugin_init_biforglpi();
+    assertSameValue(
+        'JavaScript do editor de Gauge no GLPI 11',
+        ['js/widget.js'],
+        $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
+    );
+
+    $_SERVER['REQUEST_URI'] = '/plugins/biforglpi/front/dashboard.form.php';
+    $PLUGIN_HOOKS = [];
+    plugin_init_biforglpi();
+    assertSameValue(
+        'JavaScript do editor visual no GLPI 11',
+        ['js/builder.js'],
         $PLUGIN_HOOKS['add_javascript']['biforglpi'] ?? null
     );
 
@@ -162,4 +180,9 @@ namespace {
             count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`' . $field . '`'))) > 0
         );
     }
+    assertSameValue(
+        'Campo genérico de configuração dos componentes',
+        true,
+        count(array_filter($DB->queries, static fn(string $sql): bool => str_contains($sql, '`settings_json` LONGTEXT'))) > 0
+    );
 }

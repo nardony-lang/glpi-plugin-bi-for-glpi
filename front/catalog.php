@@ -35,6 +35,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'position' => 100,
             'width' => $template['width'],
             'demo_data' => '',
+            'settings_json' => isset($template['widget_settings'])
+                ? json_encode($template['widget_settings'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                : null,
         ]);
         $redirectUrl = $pluginUrl . '/front/dashboard.php?id=' . (int) $dashboardId;
     } catch (InvalidArgumentException $exception) {

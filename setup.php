@@ -10,7 +10,7 @@ use Glpi\Plugin\Hooks;
 use GlpiPlugin\Biforglpi\Profile as BiforglpiProfile;
 use GlpiPlugin\Biforglpi\SqlLab;
 
-define('PLUGIN_BIFORGLPI_VERSION', '0.4.0');
+define('PLUGIN_BIFORGLPI_VERSION', '0.5.0-rc1');
 define('PLUGIN_BIFORGLPI_MIN_GLPI_VERSION', '11.0.0');
 define('PLUGIN_BIFORGLPI_MAX_GLPI_VERSION', '12.0.0');
 
@@ -30,7 +30,18 @@ function plugin_init_biforglpi(): void
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/sqllab.js';
     }
     if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/dashboard.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'vendor/html2canvas/html2canvas.min.js';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'vendor/jspdf/jspdf.umd.min.js';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/dashboard-canvas.js';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'vendor/echarts/echarts.min.js';
         $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/dashboard.js';
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/table.js';
+    }
+    if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/widget.form.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/widget.js';
+    }
+    if (is_string($requestPath) && str_contains($requestPath, '/biforglpi/front/dashboard.form.php')) {
+        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['biforglpi'][] = 'js/builder.js';
     }
 
     Plugin::registerClass(BiforglpiProfile::class, [
@@ -46,7 +57,7 @@ function plugin_version_biforglpi(): array
         'version'      => PLUGIN_BIFORGLPI_VERSION,
         'author'       => 'Douglas Nardoni',
         'license'      => 'GPL-3.0-or-later',
-        'homepage'     => 'https://github.com/nardony-lang/glpi-plugin-bi-for-glpi',
+        'homepage'     => 'https://github.com/nardony-lang/biforglpi',
         'requirements' => [
             'glpi' => [
                 'min' => PLUGIN_BIFORGLPI_MIN_GLPI_VERSION,

@@ -69,6 +69,32 @@
     min-width: 0;
 }
 
+.biforglpi-builder-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.biforglpi-builder-item {
+    grid-column: span var(--biforglpi-builder-width, 4);
+    min-width: 0;
+    transition: opacity 120ms ease, box-shadow 120ms ease;
+}
+
+.biforglpi-builder-item.biforglpi-dragging {
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+    opacity: 0.45;
+}
+
+.biforglpi-drag-handle {
+    cursor: grab;
+    flex: 0 0 auto;
+}
+
+.biforglpi-drag-handle:active {
+    cursor: grabbing;
+}
+
 .biforglpi-chart {
     min-height: 280px;
     overflow: hidden;
@@ -194,6 +220,90 @@
     .biforglpi-widget {
         grid-column: 1 / -1;
     }
+
+    .biforglpi-builder-item {
+        grid-column: 1 / -1;
+    }
+}
+
+.biforglpi-table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.biforglpi-analytics-table-wrap {
+    max-height: 34rem;
+}
+
+.biforglpi-analytics-table {
+    min-width: 100%;
+}
+
+.biforglpi-analytics-table th {
+    background: var(--tblr-bg-surface, #fff);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.biforglpi-analytics-table td {
+    max-width: 32rem;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+.biforglpi-sticky-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.biforglpi-progress-cell {
+    min-width: 9rem;
+}
+
+.biforglpi-progress-cell .progress {
+    margin-top: 0.35rem;
+}
+
+.biforglpi-sparkline-cell {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.65rem;
+    justify-content: center;
+    min-width: 10rem;
+}
+
+.biforglpi-sparkline {
+    display: block;
+    height: 2.25rem;
+    overflow: visible;
+    width: 7.5rem;
+}
+
+.biforglpi-table-column-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.biforglpi-table-column-rule {
+    background: color-mix(in srgb, var(--tblr-bg-surface, #fff) 94%, var(--tblr-primary, #206bc4));
+}
+
+.biforglpi-export-clone {
+    left: -100000px !important;
+    max-width: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    z-index: -1000 !important;
+}
+
+.biforglpi-export-clone .biforglpi-analytics-table-wrap {
+    max-height: none !important;
+    overflow: visible !important;
 }
 
 @media (min-width: 577px) and (max-width: 992px) {

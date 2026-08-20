@@ -53,10 +53,15 @@ function plugin_biforglpi_run_install(): bool
             `savedqueries_id` INT {$keySign} NOT NULL, `title` VARCHAR(255) DEFAULT NULL,
             `widget_type` VARCHAR(20) NOT NULL DEFAULT 'number', `position` INT UNSIGNED NOT NULL DEFAULT 0,
             `width` TINYINT UNSIGNED NOT NULL DEFAULT 4, `demo_data` LONGTEXT DEFAULT NULL,
+            `settings_json` LONGTEXT DEFAULT NULL,
             `date_creation` TIMESTAMP NULL DEFAULT NULL, `date_mod` TIMESTAMP NULL DEFAULT NULL,
             PRIMARY KEY (`id`), KEY `dashboards_id` (`dashboards_id`),
             KEY `savedqueries_id` (`savedqueries_id`), KEY `position` (`position`)
         ) ENGINE=InnoDB DEFAULT CHARSET={$charset} COLLATE={$collation} ROW_FORMAT=DYNAMIC");
+    }
+
+    if (!$DB->fieldExists(DashboardWidget::TABLE, 'settings_json')) {
+        $DB->doQuery('ALTER TABLE `' . DashboardWidget::TABLE . '` ADD `settings_json` LONGTEXT DEFAULT NULL AFTER `demo_data`');
     }
 
     if (!$DB->tableExists(DashboardAccess::TABLE)) {
@@ -126,6 +131,7 @@ function plugin_biforglpi_migrate_legacy_dashboard(): void
             'dashboards_id' => $dashboardId, 'savedqueries_id' => (int) $query['id'], 'title' => null,
             'widget_type' => (string) $query['visualization'], 'position' => $position++,
             'width' => $query['visualization'] === SavedQuery::TYPE_TABLE ? 12 : 4, 'demo_data' => null,
+            'settings_json' => null,
             'date_creation' => $now, 'date_mod' => $now,
         ]);
     }

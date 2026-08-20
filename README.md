@@ -15,7 +15,7 @@ O nome do diretório é parte da identidade do plugin e deve ser `biforglpi`:
 
 ```bash
 cd /caminho/do/glpi/plugins
-git clone https://github.com/nardony-lang/glpi-plugin-bi-for-glpi.git biforglpi
+git clone https://github.com/nardony-lang/biforglpi.git
 ```
 
 Depois, no GLPI, acesse **Configuração > Plugins**, instale e ative **BI for GLPI**.
@@ -65,7 +65,12 @@ Cada dashboard armazena seus próprios componentes e pode combinar:
 - indicadores numéricos;
 - tabelas;
 - gráficos de barras, linha e rosca;
+- Gauge (velocímetro) com mínimo, máximo, meta, unidade e faixas de cores;
 - dados reais das consultas ou dados JSON de demonstração.
+
+O **Editor visual** permite reorganizar componentes por arraste ou pelos botões de
+movimento, visualizar e alterar suas larguras, duplicar, excluir e salvar todo o
+layout em uma única operação.
 
 O modo demonstração permite desenhar e homologar painéis mesmo sem chamados ou
 SLAs cadastrados. Ao desativá-lo, os componentes executam suas consultas mantendo
@@ -84,6 +89,42 @@ O **Catálogo de indicadores** cria consultas e componentes prontos no dashboard
 O catálogo inicial inclui total e tempo médio de requisições solucionadas,
 resultados por grupo solucionador e percentual dentro do ANS. As consultas criadas
 continuam editáveis e podem ser abertas no Laboratório SQL.
+
+O Gauge utiliza o primeiro valor numérico retornado pela consulta. Sua configuração
+permite definir faixas crítica, de atenção e de sucesso, além de uma marca de meta.
+
+Cartões numéricos podem usar formatação automática ou de zero a seis casas
+decimais, prefixo, sufixo, meta e cores condicionais. As regras de cor usam duas
+faixas configuráveis e consideram valores maiores como melhores.
+
+Gráficos de barras permitem orientação vertical ou horizontal, cor única ou
+paleta, valores, grade, casas decimais e unidade. Gráficos de linha permitem
+configurar cor, escala, valores, pontos, preenchimento da área e suavização.
+
+Os gráficos são renderizados com **Apache ECharts 6.1.0**, empacotado no próprio
+plugin para funcionar sem CDN ou acesso à internet. O renderizador Canvas
+anterior permanece disponível como fallback automático caso a biblioteca não
+possa ser inicializada.
+
+Tabelas analíticas permitem ordenar, renomear e formatar colunas como texto,
+número, percentual, duração, status, barra de progresso ou minigráfico de linha
+e barras. As tabelas podem ser exportadas para PNG ou PDF diretamente no
+navegador. `html2canvas 1.4.1` e `jsPDF 4.2.1` são empacotados localmente; nenhum
+dado do dashboard é enviado a CDN ou serviço externo durante a exportação.
+
+Colunas com apresentação **Status** aplicam cores a partir do texto retornado
+pela consulta, sem diferenciar maiúsculas de minúsculas:
+
+| Cor | Valores reconhecidos |
+| --- | --- |
+| Verde | `Ativo`, `Active`, `OK`, `Sucesso`, `Sim`, `Solucionado` |
+| Amarelo | `Atenção`, `Atencao`, `Pendente`, `Planejado`, `Em atendimento` |
+| Vermelho | `Crítico`, `Critico`, `Erro`, `Não`, `Nao`, `Atrasado` |
+| Azul | qualquer outro texto |
+
+A consulta determina o texto e as faixas que produzem cada situação. A
+personalização dessas regras por componente está registrada no
+[roadmap](docs/ROADMAP.md).
 
 Ao atualizar da versão 0.2.0, o plugin cria um **Dashboard principal** e vincula
 automaticamente as consultas ativas existentes.
@@ -140,7 +181,7 @@ php tests/run.php
 ```
 
 O roteiro de homologação da versão em desenvolvimento está em
-[`docs/TESTING-0.4.0.md`](docs/TESTING-0.4.0.md).
+[`docs/TESTING-0.5.0.md`](docs/TESTING-0.5.0.md).
 
 ## Licença
 
