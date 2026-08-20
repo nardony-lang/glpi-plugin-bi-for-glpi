@@ -270,6 +270,29 @@ assertSameValue('Percentual da barra de progresso', 96.4, $tableRender['table'][
 assertSameValue('Série do minigráfico', [91.0, 93.0, 92.0, 96.4], $tableRender['table']['rows'][0][2]['series'] ?? null);
 assertSameValue('Duração formatada na tabela', '00:20:54', $tableRender['table']['rows'][0][3]['display'] ?? null);
 
+$statusTableWidget = DashboardWidget::validate([
+    'savedqueries_id' => 1,
+    'widget_type' => 'table',
+    'table_column_source' => ['situacao'],
+    'table_column_label' => ['Situação'],
+    'table_column_type' => ['badge'],
+]);
+$statusTableSettings = json_decode((string) $statusTableWidget['settings_json'], true);
+$statusTableRender = (new WidgetRenderer())->prepare(
+    [
+        'widget_type' => 'table',
+        'demo_data' => '[{"situacao":"SUCESSO"},{"situacao":"Atenção"},{"situacao":"Crítico"},{"situacao":"Informativo"}]',
+        'settings' => $statusTableSettings,
+    ],
+    ['query_sql' => 'SELECT situacao', 'row_limit' => 10],
+    true,
+    ['entity_id' => 2, 'date_start' => '2026-08-01', 'date_end' => '2026-08-31']
+);
+assertSameValue('Status de sucesso usa verde', 'green', $statusTableRender['table']['rows'][0][0]['badge_color'] ?? null);
+assertSameValue('Status de atenção usa amarelo', 'yellow', $statusTableRender['table']['rows'][1][0]['badge_color'] ?? null);
+assertSameValue('Status crítico usa vermelho', 'red', $statusTableRender['table']['rows'][2][0]['badge_color'] ?? null);
+assertSameValue('Status desconhecido usa azul', 'azure', $statusTableRender['table']['rows'][3][0]['badge_color'] ?? null);
+
 $gaugeWidget = DashboardWidget::validate([
     'savedqueries_id' => 1,
     'widget_type' => 'gauge',
