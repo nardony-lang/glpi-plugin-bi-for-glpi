@@ -3,6 +3,8 @@
 Plugin de Business Intelligence para GLPI 11. Inclui um **Laboratório SQL** seguro,
 consultas salvas, múltiplos dashboards, gráficos e controle de acesso.
 
+As alterações de cada versão estão registradas no [changelog](CHANGELOG.md).
+
 ## Compatibilidade
 
 - GLPI `>= 11.0.0` e `< 12.0.0`
